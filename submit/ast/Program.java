@@ -45,11 +45,8 @@ public class Program extends AbstractNode {
       declaration.toMIPS(code, data, symbolTable, regAllocator);
     }
 
-    // Add main function call at the end (remove the duplicate main label)
-    code.append("li $v0 10\n");  // Exit syscall
-    code.append("syscall\n");
+
 
     return MIPSResult.createVoidResult();
   }
-
 }

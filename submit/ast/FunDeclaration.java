@@ -56,7 +56,6 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     // Add return symbol to symbol table
     symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
 
-
     // Function label with comment
     code.append("\n# code for ").append(id).append("\n");
     code.append(id).append(":\n");
@@ -80,8 +79,11 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     code.append("# Exiting scope.\n");
     code.append("addi $sp $sp ").append(stackSize).append("\n");
 
-    // Only include jr $ra for non-main functions
-    if (!id.equals("main")) {
+    // Add program termination for main function
+    if (id.equals("main")) {
+      code.append("li $v0 10\n");
+      code.append("syscall\n");
+    } else {
       code.append("jr $ra\n");
     }
 

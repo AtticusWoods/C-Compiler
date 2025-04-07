@@ -16,9 +16,8 @@ main:
 # Update the stack pointer.
 addi $sp $sp -0
 # println
-lw $t0 datalabel0
-move $a0 $t0
-li $v0 11
+la $a0 datalabel0
+li $v0 4
 syscall
 la $a0 newline
 li $v0 4
@@ -34,8 +33,8 @@ syscall
 # println
 li $t0 3
 li $t1 4
-add $t2 $t0 $t1
-move $a0 $t2
+add $t0 $t0 $t1
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
@@ -45,8 +44,8 @@ syscall
 li $t0 14
 li $t1 2
 div $t0 $t1
-mflo $t2
-move $a0 $t2
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
@@ -56,19 +55,18 @@ syscall
 li $t0 7
 li $t1 1
 mult $t0 $t1
-mflo $t2
-move $a0 $t2
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
 # println
-li $t0 fillerlh
-li $t1 2
-div $t0 $t1
-mflo $t2
-move $a0 $t2
+li $t0 2
+div $t1 $t0
+mflo $t1
+move $a0 $t1
 li $v0 1
 syscall
 la $a0 newline

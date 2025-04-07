@@ -75,5 +75,4 @@ public class Call extends AbstractNode implements Expression {
     }
     throw new UnsupportedOperationException("Function calls not yet implemented");
   }
-
 }

@@ -32,4 +32,7 @@ public class NumConstant extends AbstractNode implements Expression, Node {
     return MIPSResult.createRegisterResult(reg, VarType.INT);
   }
 
+  public int getValue() {
+    return value;
+  }
 }

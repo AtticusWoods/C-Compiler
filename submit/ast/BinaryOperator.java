@@ -39,38 +39,38 @@ public class BinaryOperator extends AbstractNode implements Expression {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    // Evaluate left operand
+    // Evaluate left operand first
     MIPSResult lhsResult = lhs.toMIPS(code, data, symbolTable, regAllocator);
     String lhsReg = lhsResult.getRegister();
-
-    // If left operand isn't in a register, load it into one
-    if (lhsReg == null) {
-      lhsReg = regAllocator.getT();
-      if (lhsResult.getAddress() != null) {
-        code.append("lw ").append(lhsReg).append(" ").append(lhsResult.getAddress()).append("\n");
-      } else {
-        // Handle immediate values
-        code.append("li ").append(lhsReg).append(" ").append("fillerlh").append("\n");
-      }
-    }
 
     // Evaluate right operand
     MIPSResult rhsResult = rhs.toMIPS(code, data, symbolTable, regAllocator);
     String rhsReg = rhsResult.getRegister();
 
-    // If right operand isn't in a register, load it into one
+    // Ensure left operand is in a register
+    if (lhsReg == null) {
+      lhsReg = regAllocator.getT();
+      if (lhsResult.getAddress() != null) {
+        code.append("lw ").append(lhsReg).append(" ").append(lhsResult.getAddress()).append("\n");
+      } else if (lhs instanceof NumConstant) {
+        code.append("li ").append(lhsReg).append(" ").append(((NumConstant)lhs).getValue()).append("\n");
+      }
+    }
+
+    // Ensure right operand is in a register
     if (rhsReg == null) {
       rhsReg = regAllocator.getT();
       if (rhsResult.getAddress() != null) {
         code.append("lw ").append(rhsReg).append(" ").append(rhsResult.getAddress()).append("\n");
-      } else {
-        // Handle immediate values
-        code.append("li ").append(rhsReg).append(" ").append("fillerrh").append("\n");
+      } else if (rhs instanceof NumConstant) {
+        code.append("li ").append(rhsReg).append(" ").append(((NumConstant)rhs).getValue()).append("\n");
       }
     }
 
-    String resultReg = regAllocator.getT();
+    // Use lhsReg as the result register to match expected output
+    String resultReg = lhsReg;
 
+    // Generate the operation
     switch (type) {
       case PLUS:
         code.append("add ").append(resultReg).append(" ")
@@ -92,10 +92,10 @@ public class BinaryOperator extends AbstractNode implements Expression {
         throw new UnsupportedOperationException("Operator not implemented: " + type);
     }
 
-    regAllocator.clear(lhsReg);
+    // Clean up registers that are no longer needed
+    // Only clear the right register since we're reusing the left register
     regAllocator.clear(rhsReg);
 
     return MIPSResult.createRegisterResult(resultReg, VarType.INT);
   }
-
 }
