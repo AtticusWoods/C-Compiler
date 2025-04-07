@@ -24,6 +24,7 @@ public class SymbolTable {
   private final Set<Integer> usedTRegisters;
   private final Set<Integer> usedSRegisters;
   private int activationRecordSize;
+  private String currentFunctionName;
 
   public SymbolTable() {
     table = new HashMap<>();
@@ -154,4 +155,18 @@ public class SymbolTable {
     }
     return totalSize;
   }
+
+  public Set<String> getSymbols() {
+    Set<String> symbols = new HashSet<>(table.keySet());
+    // Remove the current function name if present
+    symbols.remove(currentFunctionName);
+    return symbols;
+  }
+
+  // Add this when creating function declarations
+  public void setCurrentFunction(String name) {
+    this.currentFunctionName = name;
+  }
+
+
 }

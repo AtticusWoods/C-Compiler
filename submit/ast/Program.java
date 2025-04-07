@@ -4,6 +4,10 @@
  */
 package submit.ast;
 
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +35,21 @@ public class Program extends AbstractNode {
     for (Declaration declaration : declarations) {
       declaration.toCminus(builder, "");
     }
+  }
+
+  @Override
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
+                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    // Generate code for all declarations
+    for (Declaration declaration : declarations) {
+      declaration.toMIPS(code, data, symbolTable, regAllocator);
+    }
+
+    // Add main function call at the end (remove the duplicate main label)
+    code.append("li $v0 10\n");  // Exit syscall
+    code.append("syscall\n");
+
+    return MIPSResult.createVoidResult();
   }
 
 }

@@ -4,6 +4,11 @@
  */
 package submit.ast;
 
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
+import submit.SymbolInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,4 +48,43 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     statement.toCminus(builder, prefix);
   }
 
+  @Override
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
+                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    symbolTable.setCurrentFunction(id);
+
+    // Add return symbol to symbol table
+    symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
+
+
+    // Function label with comment
+    code.append("\n# code for ").append(id).append("\n");
+    code.append(id).append(":\n");
+
+    // Scope entry comment
+    code.append("# Entering a new scope.\n");
+    code.append("# Symbols in symbol table:\n");
+    for (String symbol : symbolTable.getSymbols()) {
+      code.append("#  ").append(symbol).append("\n");
+    }
+
+    // Update stack pointer
+    int stackSize = symbolTable.getTotalActivationRecordSize();
+    code.append("# Update the stack pointer.\n");
+    code.append("addi $sp $sp -").append(stackSize).append("\n");
+
+    // Generate code for the function body
+    statement.toMIPS(code, data, symbolTable, regAllocator);
+
+    // Scope exit comment
+    code.append("# Exiting scope.\n");
+    code.append("addi $sp $sp ").append(stackSize).append("\n");
+
+    // Only include jr $ra for non-main functions
+    if (!id.equals("main")) {
+      code.append("jr $ra\n");
+    }
+
+    return MIPSResult.createVoidResult();
+  }
 }

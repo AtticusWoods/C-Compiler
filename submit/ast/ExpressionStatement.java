@@ -4,6 +4,10 @@
  */
 package submit.ast;
 
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
+
 /**
  *
  * @author edwajohn
@@ -21,6 +25,19 @@ public class ExpressionStatement extends AbstractNode implements Statement {
     builder.append(prefix);
     expression.toCminus(builder, prefix);
     builder.append(";\n");
+  }
+
+  @Override
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
+                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    if (expression != null) {
+      MIPSResult result = expression.toMIPS(code, data, symbolTable, regAllocator);
+      // Clear any registers used by the expression
+      if (result.getRegister() != null) {
+        regAllocator.clear(result.getRegister());
+      }
+    }
+    return MIPSResult.createVoidResult();
   }
 
 }

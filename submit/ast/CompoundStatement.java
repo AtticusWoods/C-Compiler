@@ -5,6 +5,10 @@
 package submit.ast;
 
 import java.util.List;
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
+
 
 /**
  *
@@ -27,4 +31,17 @@ public class CompoundStatement extends AbstractNode implements Statement {
     builder.append(prefix).append("}\n");
   }
 
+  @Override
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
+                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    // Create a new symbol table scope
+    SymbolTable childSymbolTable = symbolTable.createChild();
+
+    // Generate code for all statements
+    for (Statement statement : statements) {
+      statement.toMIPS(code, data, childSymbolTable, regAllocator);
+    }
+
+    return MIPSResult.createVoidResult();
+  }
 }
