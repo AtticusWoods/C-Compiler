@@ -10,7 +10,7 @@ package submit.ast;
  */
 public enum VarType {
 
-  INT("int"), BOOL("bool"), CHAR("char");
+  INT("int"), BOOL("bool"), CHAR("char"), VOID("void");
 
   private final String value;
 

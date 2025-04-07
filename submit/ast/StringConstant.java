@@ -19,5 +19,4 @@ public class StringConstant extends AbstractNode implements Expression {
   public void toCminus(StringBuilder builder, final String prefix) {
     builder.append("\"").append(value).append("\"");
   }
-
 }

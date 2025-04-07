@@ -1,5 +1,7 @@
 package submit;
 
+import submit.ast.VarType;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +32,11 @@ public class SymbolTable {
     usedTRegisters = new HashSet<>();
     usedSRegisters = new HashSet<>();
     activationRecordSize = 0;
+
+    // Add println() as a built-in function
+    addSymbol("println", new SymbolInfo("println", VarType.VOID, true));
   }
+
 
   public void addSymbol(String id, SymbolInfo symbol) {
     table.put(id, symbol);
