@@ -16,8 +16,9 @@ main:
 # Update the stack pointer.
 addi $sp $sp -0
 # println
-la $a0 datalabel0
-li $v0 4
+lw $t0 datalabel0
+move $a0 $t0
+li $v0 11
 syscall
 la $a0 newline
 li $v0 4
