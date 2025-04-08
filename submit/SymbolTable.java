@@ -25,6 +25,7 @@ public class SymbolTable {
   private final Set<Integer> usedSRegisters;
   private int activationRecordSize;
   private String currentFunctionName;
+  private int currentOffset = 0;
 
   public SymbolTable() {
     table = new HashMap<>();
@@ -168,5 +169,24 @@ public class SymbolTable {
     this.currentFunctionName = name;
   }
 
+  // Add this method to add variables with offsets
+  public void addVariable(String id, VarType type) {
+    currentOffset -= 4; // Each variable takes 4 bytes
+    table.put(id, new SymbolInfo(id, type, false, currentOffset));
+    activationRecordSize += 4;
+  }
 
+  // Add this method to get a variable's offset
+  public int getOffset(String id) {
+    SymbolInfo info = find(id);
+    if (info != null) {
+      return info.getOffset();
+    }
+    throw new RuntimeException("Variable not found: " + id);
+  }
+
+  // Get the current offset value
+  public int getCurrentOffset() {
+    return currentOffset;
+  }
 }

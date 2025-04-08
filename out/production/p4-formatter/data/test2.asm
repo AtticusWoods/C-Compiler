@@ -63,10 +63,14 @@ la $a0 newline
 li $v0 4
 syscall
 # println
-li $t0 2
-div $t1 $t0
-mflo $t1
-move $a0 $t1
+li $t0 7
+li $t1 2
+mult $t0 $t1
+mflo $t0
+li $t1 2
+div $t0 $t1
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline

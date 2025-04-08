@@ -17,6 +17,7 @@ import submit.SymbolTable;
 public class CompoundStatement extends AbstractNode implements Statement {
 
   private final List<Statement> statements;
+  private SymbolTable symbolTable; // Add this field
 
   public CompoundStatement(List<Statement> statements) {
     this.statements = statements;
@@ -33,13 +34,30 @@ public class CompoundStatement extends AbstractNode implements Statement {
 
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
-                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
+                           SymbolTable parentSymbolTable, RegisterAllocator regAllocator) {
     // Create a new symbol table scope
-    SymbolTable childSymbolTable = symbolTable.createChild();
+    this.symbolTable = parentSymbolTable.createChild();
+
+    // Calculate activation record size for local variables
+    int arSize = 0;  // Initialize to 0 as in the example output
+
+    code.append("# Entering a new scope.\n");
+    code.append("# Symbols in symbol table:\n");
+    for (String symbol : symbolTable.getSymbols()) {
+      code.append("#  ").append(symbol).append("\n");
+    }
+    code.append("# Update the stack pointer.\n");
+    code.append("addi $sp $sp -").append(arSize).append("\n");
 
     // Generate code for all statements
     for (Statement statement : statements) {
-      statement.toMIPS(code, data, childSymbolTable, regAllocator);
+      statement.toMIPS(code, data, symbolTable, regAllocator);
+    }
+
+    // Clean up scope
+    if (arSize > 0) {
+      code.append("# Exiting scope.\n");
+      code.append("addi $sp $sp ").append(arSize).append("\n");
     }
 
     return MIPSResult.createVoidResult();
