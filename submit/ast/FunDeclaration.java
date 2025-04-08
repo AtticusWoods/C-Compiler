@@ -53,33 +53,17 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     symbolTable.setCurrentFunction(id);
 
-    // Add return symbol to symbol table
+    // Add return symbol
     symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
 
-    // Function label with comment
+    // Function prologue
     code.append("\n# code for ").append(id).append("\n");
     code.append(id).append(":\n");
 
-    // Scope entry comment
-    code.append("# Entering a new scope.\n");
-    code.append("# Symbols in symbol table:\n");
-    for (String symbol : symbolTable.getSymbols()) {
-      code.append("#  ").append(symbol).append("\n");
-    }
-
-    // Update stack pointer
-    int stackSize = symbolTable.getTotalActivationRecordSize();
-    code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -").append(stackSize).append("\n");
-
-    // Generate code for the function body
+    // Generate code for function body
     statement.toMIPS(code, data, symbolTable, regAllocator);
 
-    // Scope exit comment
-    code.append("# Exiting scope.\n");
-    code.append("addi $sp $sp ").append(stackSize).append("\n");
 
-    // Add program termination for main function
     if (id.equals("main")) {
       code.append("li $v0 10\n");
       code.append("syscall\n");

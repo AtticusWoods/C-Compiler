@@ -2,7 +2,6 @@ package submit.ast;
 
 import submit.MIPSResult;
 import submit.RegisterAllocator;
-import submit.SymbolInfo;
 import submit.SymbolTable;
 
 public class Mutable extends AbstractNode implements Expression, Node {
@@ -28,7 +27,9 @@ public class Mutable extends AbstractNode implements Expression, Node {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    String resultReg = regAllocator.getT();
+    String resultReg = regAllocator.getAny();
+    String valueReg = regAllocator.getAny(); // For loaded value
+
     int offset = symbolTable.getOffset(id);
 
     // Generate comments for clarity in assembly code

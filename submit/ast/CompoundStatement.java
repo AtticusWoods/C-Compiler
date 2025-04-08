@@ -7,6 +7,7 @@ package submit.ast;
 import java.util.List;
 import submit.MIPSResult;
 import submit.RegisterAllocator;
+import submit.SymbolInfo;
 import submit.SymbolTable;
 
 
@@ -35,30 +36,36 @@ public class CompoundStatement extends AbstractNode implements Statement {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable parentSymbolTable, RegisterAllocator regAllocator) {
-    // Create a new symbol table scope
-    this.symbolTable = parentSymbolTable.createChild();
+    // Create new scope
+    this.symbolTable = parentSymbolTable;
 
-    // Calculate activation record size for local variables
-    int arSize = 0;  // Initialize to 0 as in the example output
+    // Process declarations first (adds variables to symbol table)
+    for (Statement s : statements) {
+      if (s instanceof VarDeclaration) {
+        s.toMIPS(code, data, symbolTable, regAllocator);
+      }
+    }
 
+
+    // Print scope information AFTER declarations are processed
     code.append("# Entering a new scope.\n");
     code.append("# Symbols in symbol table:\n");
     for (String symbol : symbolTable.getSymbols()) {
       code.append("#  ").append(symbol).append("\n");
     }
     code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -").append(arSize).append("\n");
+    code.append("addi $sp $sp -").append(symbolTable.getActivationRecordSize()).append("\n");
 
-    // Generate code for all statements
-    for (Statement statement : statements) {
-      statement.toMIPS(code, data, symbolTable, regAllocator);
+    // Process other statements
+    for (Statement s : statements) {
+      if (!(s instanceof VarDeclaration)) {
+        s.toMIPS(code, data, symbolTable, regAllocator);
+      }
     }
 
     // Clean up scope
-    if (arSize > 0) {
-      code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp ").append(arSize).append("\n");
-    }
+    code.append("# Exiting scope.\n");
+    code.append("addi $sp $sp ").append(symbolTable.getActivationRecordSize()).append("\n");
 
     return MIPSResult.createVoidResult();
   }
