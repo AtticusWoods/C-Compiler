@@ -40,7 +40,7 @@ public class UnaryOperator extends AbstractNode implements Expression {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     MIPSResult exprResult = expression.toMIPS(code, data, symbolTable, regAllocator);
-//    String exprReg = exprResult.getRegister();
+    String exprReg = exprResult.getRegister();
 
 //    // If the expression result wasn't in a register (e.g., it was a constant)
 //    if (exprReg == null) {
@@ -58,7 +58,7 @@ public class UnaryOperator extends AbstractNode implements Expression {
     switch (type) {
       case NEG:
         // Optimized negation: 0 - value
-        code.append("sub ").append(resultReg).append(" ").append("$zero").append(" ").append(resultReg).append("\n");
+        code.append("sub ").append(exprReg).append(" ").append("$zero").append(" ").append(exprReg).append("\n");
         break;
       case NOT:
         // Logical NOT implementation
@@ -77,6 +77,6 @@ public class UnaryOperator extends AbstractNode implements Expression {
     // Clear the expression register if we're done with it
 //    regAllocator.clear(exprReg);
 
-    return MIPSResult.createRegisterResult(resultReg, exprResult.getType());
+    return MIPSResult.createRegisterResult(exprReg, exprResult.getType());
   }
 }

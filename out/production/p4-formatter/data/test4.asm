@@ -14,6 +14,7 @@ main:
 #  a
 #  println
 #  b
+#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # println
