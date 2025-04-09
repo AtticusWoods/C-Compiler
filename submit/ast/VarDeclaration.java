@@ -6,9 +6,11 @@ package submit.ast;
 
 import submit.MIPSResult;
 import submit.RegisterAllocator;
+import submit.SymbolInfo;
 import submit.SymbolTable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -52,11 +54,15 @@ public class VarDeclaration extends AbstractNode implements Declaration {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     for (String id : ids) {
-      // Add variable with proper offset calculation
+      // Calculate offset based on current stack position
+      int offset = -4 - symbolTable.getCurrentScopeSize();
       java.lang.System.out.println("Adding variable " + id + " with type " + type);
-      symbolTable.addVariable(id, type);
+      symbolTable.addSymbol(id, new SymbolInfo(id, type, false, offset));
     }
     return MIPSResult.createVoidResult();
   }
 
+  public List<String> getIds() {
+    return ids;
+  }
 }

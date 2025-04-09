@@ -28,7 +28,6 @@ public class Mutable extends AbstractNode implements Expression, Node {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     String resultReg = regAllocator.getAny();
-    String valueReg = regAllocator.getAny(); // For loaded value
 
     int offset = symbolTable.getOffset(id);
 

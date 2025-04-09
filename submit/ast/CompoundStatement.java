@@ -18,7 +18,6 @@ import submit.SymbolTable;
 public class CompoundStatement extends AbstractNode implements Statement {
 
   private final List<Statement> statements;
-  private SymbolTable symbolTable; // Add this field
 
   public CompoundStatement(List<Statement> statements) {
     this.statements = statements;
@@ -36,25 +35,29 @@ public class CompoundStatement extends AbstractNode implements Statement {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable parentSymbolTable, RegisterAllocator regAllocator) {
-    // Create new scope
-    this.symbolTable = parentSymbolTable;
+    // Create new child scope
+    SymbolTable symbolTable = parentSymbolTable.createChild();
 
-    // Process declarations first (adds variables to symbol table)
+    // Process declarations first to set up scope
     for (Statement s : statements) {
       if (s instanceof VarDeclaration) {
         s.toMIPS(code, data, symbolTable, regAllocator);
       }
     }
 
-
-    // Print scope information AFTER declarations are processed
+    // Print scope info
     code.append("# Entering a new scope.\n");
     code.append("# Symbols in symbol table:\n");
     for (String symbol : symbolTable.getSymbols()) {
       code.append("#  ").append(symbol).append("\n");
     }
-    code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -").append(symbolTable.getActivationRecordSize()).append("\n");
+
+    // Adjust stack pointer for this scope
+    int scopeSize = symbolTable.getCurrentScopeSize();
+    if (scopeSize > 0) {
+      code.append("# Update the stack pointer.\n");
+      code.append("addi $sp $sp -").append(scopeSize).append("\n");
+    }
 
     // Process other statements
     for (Statement s : statements) {
@@ -64,8 +67,10 @@ public class CompoundStatement extends AbstractNode implements Statement {
     }
 
     // Clean up scope
-    code.append("# Exiting scope.\n");
-    code.append("addi $sp $sp ").append(symbolTable.getActivationRecordSize()).append("\n");
+    if (scopeSize > 0) {
+      code.append("# Exiting scope.\n");
+      code.append("addi $sp $sp ").append(scopeSize).append("\n");
+    }
 
     return MIPSResult.createVoidResult();
   }

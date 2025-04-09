@@ -176,17 +176,32 @@ public class SymbolTable {
     activationRecordSize += 4;
   }
 
-  // Add this method to get a variable's offset
   public int getOffset(String id) {
-    SymbolInfo info = find(id);
-    if (info != null) {
+    SymbolInfo info = this.find(id);
+    if (info == null) {
+      throw new RuntimeException("Variable not found: " + id);
+    }
+
+    // Variable is in current scope
+    if (table.containsKey(id)) {
       return info.getOffset();
     }
-    throw new RuntimeException("Variable not found: " + id);
+    // Variable is in parent scope
+    else if (parent != null) {
+      return parent.getOffset(id) + this.getCurrentScopeSize();
+    }
+
+    throw new RuntimeException("Variable not found in any scope: " + id);
   }
 
-  // Get the current offset value
-  public int getCurrentOffset() {
-    return currentOffset;
+  public int getCurrentScopeSize() {
+    // Only count variables declared in this specific scope
+    int size = 0;
+    for (SymbolInfo info : table.values()) {
+      if (!info.isFunction()) {
+        size += 4; // Each variable takes 4 bytes
+      }
+    }
+    return size;
   }
 }

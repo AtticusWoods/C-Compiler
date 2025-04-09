@@ -33,44 +33,44 @@ syscall
 # println
 li $t0 3
 li $t1 4
-add $t2 $t0 $t1
-move $a0 $t2
+add $t0 $t0 $t1
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
 # println
-li $t1 14
-li $t2 2
-div $t1 $t2
-mflo $t3
-move $a0 $t3
+li $t0 14
+li $t1 2
+div $t0 $t1
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
 # println
-li $t2 7
-li $t3 1
-mult $t2 $t3
-mflo $t4
-move $a0 $t4
+li $t0 7
+li $t1 1
+mult $t0 $t1
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
 # println
-li $t3 7
-li $t4 2
-mult $t3 $t4
-mflo $t5
-li $t4 2
-div $t5 $t4
-mflo $t6
-move $a0 $t6
+li $t0 7
+li $t1 2
+mult $t0 $t1
+mflo $t0
+li $t1 2
+div $t0 $t1
+mflo $t0
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
