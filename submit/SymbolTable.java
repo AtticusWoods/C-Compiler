@@ -42,6 +42,7 @@ public class SymbolTable {
 
   public void addSymbol(String id, SymbolInfo symbol) {
     table.put(id, symbol);
+//    java.lang.System.out.println(table);
   }
 
   /**

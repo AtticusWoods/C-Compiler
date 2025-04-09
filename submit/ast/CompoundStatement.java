@@ -38,32 +38,35 @@ public class CompoundStatement extends AbstractNode implements Statement {
     // Create new child scope
     SymbolTable symbolTable = parentSymbolTable.createChild();
 
-    // Process declarations first to set up scope
+    // Calculate total size needed for this scope's variables
+    int scopeSize = 0;
     for (Statement s : statements) {
       if (s instanceof VarDeclaration) {
-        s.toMIPS(code, data, symbolTable, regAllocator);
+        VarDeclaration varDecl = (VarDeclaration) s;
+        for (String id : varDecl.getIds()) {
+          scopeSize += 4; // Each variable takes 4 bytes
+          symbolTable.addSymbol(id, new SymbolInfo(id, varDecl.getType(), false));
+        }
       }
     }
 
-    // Print scope info
-    code.append("# Entering a new scope.\n");
-    code.append("# Symbols in symbol table:\n");
-    for (String symbol : symbolTable.getSymbols()) {
-      code.append("#  ").append(symbol).append("\n");
-    }
-
-    // Adjust stack pointer for this scope
-    int scopeSize = symbolTable.getCurrentScopeSize();
+    // Only print scope info and adjust stack if we have variables
     if (scopeSize > 0) {
+      code.append("# Entering a new scope.\n");
+      code.append("# Symbols in symbol table:\n");
+      for (String symbol : symbolTable.getSymbols()) {
+        code.append("#  ").append(symbol).append("\n");
+      }
       code.append("# Update the stack pointer.\n");
+      java.lang.System.out.println(" Scope size: " + scopeSize);
+      java.lang.System.out.println(symbolTable.getSymbols());
+
       code.append("addi $sp $sp -").append(scopeSize).append("\n");
     }
 
-    // Process other statements
+    // Process all statements in the scope
     for (Statement s : statements) {
-      if (!(s instanceof VarDeclaration)) {
-        s.toMIPS(code, data, symbolTable, regAllocator);
-      }
+      s.toMIPS(code, data, symbolTable, regAllocator);
     }
 
     // Clean up scope
@@ -73,5 +76,9 @@ public class CompoundStatement extends AbstractNode implements Statement {
     }
 
     return MIPSResult.createVoidResult();
+  }
+
+  public List<Statement> getStatements() {
+    return statements;
   }
 }

@@ -60,14 +60,59 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     code.append("\n# code for ").append(id).append("\n");
     code.append(id).append(":\n");
 
-    // Generate code for function body
-    statement.toMIPS(code, data, symbolTable, regAllocator);
 
 
+
+    // Special handling for main function
     if (id.equals("main")) {
-      code.append("li $v0 10\n");
-      code.append("syscall\n");
+//      code.append("\n# code for ").append(id).append("\n");
+//      code.append(id).append(":\n");
+//
+//      // Add variables to symbol table but don't allocate space yet
+//      for (Param param : params) {
+//        // Handle parameters if needed
+//      }
+
+      // Process the function body without initial allocation
+      if (statement instanceof CompoundStatement) {
+        // Create temporary symbol table for declarations
+        SymbolTable tempTable = symbolTable.createChild();
+
+        // Find all variable declarations
+        CompoundStatement cs = (CompoundStatement) statement;
+        for (Statement s : cs.getStatements()) {
+          if (s instanceof VarDeclaration) {
+            VarDeclaration varDecl = (VarDeclaration) s;
+            for (String id : varDecl.getIds()) {
+              tempTable.addSymbol(id, new SymbolInfo(id, varDecl.getType(), false));
+            }
+          }
+        }
+        // Add return symbol
+        tempTable.addSymbol("return", new SymbolInfo("return", returnType, false));
+
+        // Output initial scope with 0 allocation
+        code.append("# Entering a new scope.\n");
+        code.append("# Symbols in symbol table:\n");
+        for (String symbol : tempTable.getSymbols()) {
+          code.append("#  ").append(symbol).append("\n");
+        }
+        code.append("# Update the stack pointer.\n");
+        code.append("addi $sp $sp -0\n");
+
+        // Now process the actual statements
+        for (Statement s : cs.getStatements()) {
+          s.toMIPS(code, data, tempTable, regAllocator);
+        }
+
+        code.append("# Exiting scope.\n");
+        code.append("addi $sp $sp ").append(0).append("\n");
+        code.append("li $v0 10\n");
+        code.append("syscall\n");
+      }
     } else {
+      // Generate code for function body
+      statement.toMIPS(code, data, symbolTable, regAllocator);
       code.append("jr $ra\n");
     }
 
