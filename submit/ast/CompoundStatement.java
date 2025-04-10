@@ -45,7 +45,7 @@ public class CompoundStatement extends AbstractNode implements Statement {
         VarDeclaration varDecl = (VarDeclaration) s;
         for (String id : varDecl.getIds()) {
           scopeSize += 4; // Each variable takes 4 bytes
-          symbolTable.addSymbol(id, new SymbolInfo(id, varDecl.getType(), false));
+          symbolTable.addVariable(id, varDecl.getType());
         }
       }
     }

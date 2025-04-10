@@ -47,7 +47,7 @@ sw $t1 0($t0)
 # Update the stack pointer.
 addi $sp $sp -4
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 -4
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Compute rhs for assignment =
@@ -56,7 +56,7 @@ li $t1 5
 sw $t1 0($t0)
 # println
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 -4
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of a.
@@ -81,7 +81,7 @@ syscall
 # Update the stack pointer.
 addi $sp $sp -4
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t0 -4
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Compute rhs for assignment =
@@ -89,7 +89,7 @@ li $t1 9
 # complete assignment statement with store
 sw $t1 0($t0)
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 0
+li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Compute rhs for assignment =
@@ -99,13 +99,13 @@ sub $t2 $zero $t2
 sw $t2 0($t0)
 # println
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 0
+li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of a.
 lw $t0 0($t0)
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t2 -4
+li $t2 -8
 # Add the stack pointer address to the offset.
 add $t2 $t2 $sp
 # Load the value of b.

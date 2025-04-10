@@ -75,7 +75,8 @@ public class UnaryOperator extends AbstractNode implements Expression {
     }
 
     // Clear the expression register if we're done with it
-//    regAllocator.clear(exprReg);
+    regAllocator.clear(exprReg);
+    regAllocator.clear(resultReg);
 
     return MIPSResult.createRegisterResult(exprReg, exprResult.getType());
   }
