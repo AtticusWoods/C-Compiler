@@ -153,4 +153,18 @@ public final class RegisterAllocator {
             throw new RuntimeException("Unexpected register in markAsUsed: " + reg);
         }
     }
+
+    /**
+     * Gets the count of temporary registers currently in use
+     * @return The number of t registers in use
+     */
+    public int getUsedTRegCount() {
+        int count = 0;
+        for (int i = 0; i < t.length; i++) {
+            if (t[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
 }

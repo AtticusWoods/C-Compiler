@@ -39,7 +39,7 @@ public class BinaryOperator extends AbstractNode implements Expression {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    // Evaluate left operand first
+        // Evaluate left operand first
     MIPSResult lhsResult = lhs.toMIPS(code, data, symbolTable, regAllocator);
     String lhsReg = lhsResult.getRegister();
 

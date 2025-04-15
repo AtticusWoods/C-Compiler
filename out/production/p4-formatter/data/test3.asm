@@ -11,15 +11,10 @@ j main
 main:
 # Entering a new scope.
 # Symbols in symbol table:
-#  println
-#  return
-# Update the stack pointer.
-addi $sp $sp -0
-# Entering a new scope.
-# Symbols in symbol table:
 #  a
 #  println
 #  b
+#  return
 # Update the stack pointer.
 addi $sp $sp -8
 # println
@@ -51,15 +46,15 @@ li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of a.
-lw $t0 0($t0)
+lw $t1 0($t0)
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t1 -8
+li $t0 -8
 # Add the stack pointer address to the offset.
-add $t1 $t1 $sp
+add $t0 $t0 $sp
 # Load the value of b.
-lw $t1 0($t1)
-add $t0 $t0 $t1
-move $a0 $t0
+lw $t2 0($t0)
+add $t1 $t1 $t2
+move $a0 $t1
 li $v0 1
 syscall
 la $a0 newline
@@ -67,8 +62,6 @@ li $v0 4
 syscall
 # Exiting scope.
 addi $sp $sp 8
-# Exiting scope.
-addi $sp $sp 0
 li $v0 10
 syscall
 

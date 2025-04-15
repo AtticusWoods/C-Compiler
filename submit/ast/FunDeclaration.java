@@ -81,8 +81,11 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       code.append("#  ").append(symbol).append("\n");
     }
 
+    // Calculate total size needed for local variables (4 bytes per variable)
+    int localVarsSize = functionTable.getActivationRecordSize();
+    
     code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -0\n");  // Will be adjusted by compound statements
+    code.append("addi $sp $sp -").append(localVarsSize).append("\n");
 
     // Special handling for main function
     if (id.equals("main")) {
@@ -91,7 +94,7 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
 
       // Main function epilogue
       code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp 0\n");
+      code.append("addi $sp $sp ").append(localVarsSize).append("\n");
       code.append("li $v0 10\n");  // Exit syscall
       code.append("syscall\n");
     } else {
@@ -100,7 +103,7 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
 
       // Regular function epilogue
       code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp 0\n");
+      code.append("addi $sp $sp ").append(localVarsSize).append("\n");
       code.append("jr $ra\n");  // Return to caller
     }
 

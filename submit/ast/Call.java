@@ -79,18 +79,20 @@ public class Call extends AbstractNode implements Expression {
       code.append("# Save $ra to a register\n");
       code.append("move $t0 $ra\n");
       
-      // Determine stack adjustment based on current function
-      int saveOffset = -4;
-      int saveSize = 4;
+      // Calculate stack offset based on local variables in the calling function
+      int localVarsSize = symbolTable.getActivationRecordSize();
       
-      // For otherrester aredetermreffset
+      // Stack offsets for saving registers and parameters
+      int saveOffset = -4 - localVarsSize; // Account for local variables
+      int saveSize = 4 + localVarsSize;   // Account for local variables
+      
       code.append("# Save $t0-9 registers\n");
       code.append("sw $t0 ").append(saveOffset).append("($sp)\n");
       
       // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
       
-      // Update stack pointer
+      // Update stack pointer - include space for local variables
       code.append("# Update the stack pointer\n");
       code.append("add $sp $sp -").append(saveSize).append("\n");
       
@@ -98,7 +100,7 @@ public class Call extends AbstractNode implements Expression {
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
       
-      // Restore stack pointer
+      // Restore stack pointer - include space for local variables
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(saveSize).append("\n");
       

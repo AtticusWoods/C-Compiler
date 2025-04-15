@@ -36,7 +36,7 @@ fum:
 #  b
 #  return
 # Update the stack pointer.
-addi $sp $sp -0
+addi $sp $sp -8
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -79,20 +79,20 @@ syscall
 # Save $ra to a register
 move $t0 $ra
 # Save $t0-9 registers
-sw $t0 -4($sp)
+sw $t0 -12($sp)
 # Evaluate parameters and save to stack
 # Update the stack pointer
-add $sp $sp -4
+add $sp $sp -12
 # Call the function
 jal foo
 # Restore the stack pointer
-add $sp $sp 4
+add $sp $sp 12
 # Restore $t0-9 registers
-lw $t0 -4($sp)
+lw $t0 -12($sp)
 # Restore $ra
 move $ra $t0
 # Exiting scope.
-addi $sp $sp 0
+addi $sp $sp 8
 jr $ra
 
 # code for main

@@ -36,7 +36,7 @@ public class Mutable extends AbstractNode implements Expression, Node {
     // Always use a different register for the result
     // This prevents overwriting previously loaded values
     String resultReg = regAllocator.getT();
-    
+
     // Generate comments for clarity in assembly code
     code.append("# Get " + id + "'s offset from $sp from the symbol table and initialize "
                 + id + "'s address with it. We'll add $sp later.\n");
@@ -47,8 +47,8 @@ public class Mutable extends AbstractNode implements Expression, Node {
     code.append("lw ").append(resultReg).append(" 0(").append(addrReg).append(")\n");
 
     // Free the address register since we no longer need it
-    regAllocator.clear(addrReg);
-    
+      regAllocator.clear(addrReg);
+        
     return MIPSResult.createRegisterResult(resultReg, VarType.INT);
   }
 
