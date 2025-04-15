@@ -16,7 +16,7 @@ main:
 #  b
 #  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # println
 la $a0 datalabel0
 li $v0 4
@@ -48,12 +48,12 @@ add $t0 $t0 $sp
 # Load the value of a.
 lw $t0 0($t0)
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t2 -8
+li $t1 -8
 # Add the stack pointer address to the offset.
-add $t2 $t2 $sp
+add $t1 $t1 $sp
 # Load the value of b.
-lw $t2 0($t2)
-add $t0 $t0 $t2
+lw $t1 0($t1)
+add $t0 $t0 $t1
 move $a0 $t0
 li $v0 1
 syscall
@@ -61,7 +61,7 @@ la $a0 newline
 li $v0 4
 syscall
 # Exiting scope.
-addi $sp $sp 8
+addi $sp $sp 0
 li $v0 10
 syscall
 
