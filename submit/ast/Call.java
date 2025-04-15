@@ -72,7 +72,56 @@ public class Call extends AbstractNode implements Expression {
       code.append("syscall\n");
 
       return MIPSResult.createVoidResult();
+    } else {
+      // Only save actually used registers
+      List<String> usedRegs = regAllocator.getUsed();
+      int saveSize = usedRegs.size() * 4;
+
+      // Save $ra
+      String tempReg = regAllocator.getAny();
+      code.append("# Calling function ").append(id).append("\n");
+      code.append("# Save $ra to a register\n");
+      code.append("move ").append(tempReg).append(" $ra\n");
+
+      // Save used registers
+      if (!usedRegs.isEmpty()) {
+        code.append("# Save used registers\n");
+        int offset = -4;
+        for (String reg : usedRegs) {
+          code.append("sw ").append(reg).append(" ").append(offset).append("($sp)\n");
+          offset -= 4;
+        }
+      }
+
+      // Adjust stack pointer
+      code.append("# Update the stack pointer\n");
+      code.append("addi $sp $sp ").append(-saveSize).append("\n");
+
+      // Make the call
+      code.append("# Call the function\n");
+      code.append("jal ").append(id).append("\n");
+
+      // Restore stack pointer
+      code.append("# Restore the stack pointer\n");
+      code.append("addi $sp $sp ").append(saveSize).append("\n");
+
+      // Restore used registers
+      if (!usedRegs.isEmpty()) {
+        code.append("# Restore used registers\n");
+        int offset = -4;
+        for (String reg : usedRegs) {
+          code.append("lw ").append(reg).append(" ").append(offset).append("($sp)\n");
+          offset -= 4;
+        }
+      }
+
+      // Restore $ra
+      code.append("# Restore $ra\n");
+      code.append("move $ra ").append(tempReg).append("\n");
+
+      regAllocator.clear(tempReg);
     }
-    throw new UnsupportedOperationException("Function calls not yet implemented");
+    return MIPSResult.createVoidResult();
+//    throw new UnsupportedOperationException("Function calls not yet implemented");
   }
 }

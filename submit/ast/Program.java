@@ -40,6 +40,8 @@ public class Program extends AbstractNode {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
+//    code.append("j main\n\n");
+
     // Generate code for all declarations
     for (Declaration declaration : declarations) {
       declaration.toMIPS(code, data, symbolTable, regAllocator);
