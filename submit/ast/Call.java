@@ -42,6 +42,7 @@ public class Call extends AbstractNode implements Expression {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     if (id.equals("println")) {
+      // Handle println specially
       code.append("# println\n");
 
       if (args.size() != 1) {
@@ -73,49 +74,43 @@ public class Call extends AbstractNode implements Expression {
 
       return MIPSResult.createVoidResult();
     } else {
-      // Save $ra in $t0
+      // For regular function calls
       code.append("# Calling function ").append(id).append("\n");
       code.append("# Save $ra to a register\n");
       code.append("move $t0 $ra\n");
-
+      
       // Determine stack adjustment based on current function
       int saveOffset = -4;
       int saveSize = 4;
       
-      // Special case for function fum - uses -12 and 12 for stack adjustments
-      String currentFunction = symbolTable.getCurrentFunctionName();
-      if (currentFunction != null && currentFunction.equals("fum")) {
-        saveOffset = -12;
-        saveSize = 12;
-      }
-
-      // Save $t0 register at the determined offset
+      // For otherrester aredetermreffset
       code.append("# Save $t0-9 registers\n");
       code.append("sw $t0 ").append(saveOffset).append("($sp)\n");
       
-      // Evaluate parameters and save to stack (placeholder for future)
+      // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
       
-      // Update the stack pointer with the determined size
+      // Update stack pointer
       code.append("# Update the stack pointer\n");
       code.append("add $sp $sp -").append(saveSize).append("\n");
-
+      
       // Make the call
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
-
+      
       // Restore stack pointer
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(saveSize).append("\n");
-
-      // Restore $t0 register from the determined offset
+      
+      // Restore $t0 register
       code.append("# Restore $t0-9 registers\n");
       code.append("lw $t0 ").append(saveOffset).append("($sp)\n");
-
+      
       // Restore $ra
       code.append("# Restore $ra\n");
       code.append("move $ra $t0\n");
+      
+      return MIPSResult.createVoidResult();
     }
-    return MIPSResult.createVoidResult();
   }
 }

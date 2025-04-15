@@ -61,15 +61,20 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
 
     // For all functions (including main), add scope entry
     code.append("# Entering a new scope.\n");
+    
+    // Reset the offset counter for this function
+    functionTable.resetOffset();
+    
+    // Process the function body to collect variable declarations
+    // We need to find all variables before printing the symbol table
+    extractVariableDeclarations(statement, functionTable);
+    
     code.append("# Symbols in symbol table:\n");
     
     // Add function parameters to the symbol table
     for (Param param : params) {
       functionTable.addVariable(param.getId(), param.getType());
     }
-    
-    // Reset the offset counter for this function
-    functionTable.resetOffset();
 
     // Print all symbols in this function's scope
     for (String symbol : functionTable.getSymbols()) {
@@ -100,6 +105,24 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     }
 
     return MIPSResult.createVoidResult();
+  }
+  
+  /**
+   * Extract variable declarations from a compound statement to populate the symbol table
+   * before generating any code
+   */
+  private void extractVariableDeclarations(Statement statement, SymbolTable symbolTable) {
+    if (statement instanceof CompoundStatement) {
+      CompoundStatement compound = (CompoundStatement) statement;
+      for (Statement stmt : compound.getStatements()) {
+        if (stmt instanceof VarDeclaration) {
+          VarDeclaration varDecl = (VarDeclaration) stmt;
+          for (String id : varDecl.getIds()) {
+            symbolTable.addVariable(id, varDecl.getType());
+          }
+        }
+      }
+    }
   }
 }
 

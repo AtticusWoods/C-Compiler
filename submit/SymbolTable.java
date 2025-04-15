@@ -174,8 +174,19 @@ public class SymbolTable {
 
   // Add this method to add variables with offsets
   public void addVariable(String id, VarType type) {
-    currentOffset -= 4; // Each variable takes 4 bytes
-    table.put(id, new SymbolInfo(id, type, false, currentOffset));
+    int variableCount = 0;
+    
+    // Count only non-function symbols that aren't system defined (println, return)
+    for (String symbol : table.keySet()) {
+      if (!symbol.equals("println") && !symbol.equals("return") && 
+          !symbol.equals(currentFunctionName)) {
+        variableCount++;
+      }
+    }
+    
+    // Calculate offset starting from -4 and decreasing by 4 for each additional variable
+    int offset = -4 * (variableCount + 1);
+    table.put(id, new SymbolInfo(id, type, false, offset));
     activationRecordSize += 4;
   }
 

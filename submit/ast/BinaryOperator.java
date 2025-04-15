@@ -67,7 +67,7 @@ public class BinaryOperator extends AbstractNode implements Expression {
       }
     }
 
-    // Use lhsReg as the result register to match expected output
+    // Use lhsReg as the result register
     String resultReg = lhsReg;
 
     // Generate the operation
@@ -93,8 +93,9 @@ public class BinaryOperator extends AbstractNode implements Expression {
     }
 
     // Clean up registers that are no longer needed
-    // Only clear the right register since we're reusing the left register
-    regAllocator.clear(rhsReg);
+    if (!rhsReg.equals(resultReg)) {
+      regAllocator.clear(rhsReg);
+    }
 
     return MIPSResult.createRegisterResult(resultReg, VarType.INT);
   }

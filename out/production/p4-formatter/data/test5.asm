@@ -31,7 +31,9 @@ jr $ra
 fum:
 # Entering a new scope.
 # Symbols in symbol table:
+#  a
 #  println
+#  b
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -63,8 +65,8 @@ li $t1 -12
 # Add the stack pointer address to the offset.
 add $t1 $t1 $sp
 # Load the value of a.
-lw $t1 0($t1)
-sub $t0 $t0 $t1
+lw $t0 0($t1)
+sub $t0 $t0 $t0
 li $t1 4
 add $t0 $t0 $t1
 move $a0 $t0

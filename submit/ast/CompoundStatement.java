@@ -35,26 +35,15 @@ public class CompoundStatement extends AbstractNode implements Statement {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable parentSymbolTable, RegisterAllocator regAllocator) {
-    
+    // Always use the existing parent symbol table - this flattens the scope hierarchy
     SymbolTable symbolTable = parentSymbolTable;
     
-    // Calculate total size needed for this scope's variables
-    int scopeSize = 0;
-
-    // First pass - add all variables to the symbol table
+    // Process all statements in the scope without re-adding variables
+    // as they've already been added in FunDeclaration.extractVariableDeclarations
     for (Statement s : statements) {
-      if (s instanceof VarDeclaration) {
-        VarDeclaration varDecl = (VarDeclaration) s;
-        for (String id : varDecl.getIds()) {
-          scopeSize += 4; // Each variable takes 4 bytes
-          symbolTable.addVariable(id, varDecl.getType());
-        }
+      if (!(s instanceof VarDeclaration)) {
+        s.toMIPS(code, data, symbolTable, regAllocator);
       }
-    }
-
-    // Process all statements in the scope
-    for (Statement s : statements) {
-      s.toMIPS(code, data, symbolTable, regAllocator);
     }
 
     return MIPSResult.createVoidResult();

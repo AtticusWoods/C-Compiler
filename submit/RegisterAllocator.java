@@ -123,4 +123,34 @@ public final class RegisterAllocator {
         Arrays.fill(t, false);
         Arrays.fill(s, false);
     }
+
+    /**
+     * Checks if a specific register is already in use
+     * @param reg The register to check (format: $t0, $s1, etc)
+     * @return true if the register is in use, false otherwise
+     */
+    public boolean isInUse(String reg) {
+        if (reg.charAt(1) == 's') {
+            return s[Integer.parseInt(reg.substring(2))];
+        } else if (reg.charAt(1) == 't') {
+            return t[Integer.parseInt(reg.substring(2))];
+        }
+        throw new RuntimeException("Unexpected register in isInUse: " + reg);
+    }
+
+    /**
+     * Marks a specific register as being used
+     * @param reg The register to mark (format: $t0, $s1, etc)
+     */
+    public void markAsUsed(String reg) {
+        if (reg.charAt(1) == 's') {
+            s[Integer.parseInt(reg.substring(2))] = true;
+            used.add(reg);
+        } else if (reg.charAt(1) == 't') {
+            t[Integer.parseInt(reg.substring(2))] = true;
+            used.add(reg);
+        } else {
+            throw new RuntimeException("Unexpected register in markAsUsed: " + reg);
+        }
+    }
 }

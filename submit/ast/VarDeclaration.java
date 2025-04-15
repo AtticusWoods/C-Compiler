@@ -52,11 +52,7 @@ public class VarDeclaration extends AbstractNode implements Declaration {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    for (String id : ids) {
-      // Add variable with proper offset calculation
-//      java.lang.System.out.println("Adding variable " + id + " with type " + type);
-      symbolTable.addVariable(id, type);
-    }
+    // Do nothing - variables are pre-processed in FunDeclaration.extractVariableDeclarations
     return MIPSResult.createVoidResult();
   }
 
