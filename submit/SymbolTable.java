@@ -37,6 +37,8 @@ public class SymbolTable {
 
     // Add println() as a built-in function
     addSymbol("println", new SymbolInfo("println", VarType.VOID, true));
+    // Add return symbol
+    addSymbol("return", new SymbolInfo("return", null, true));
   }
 
 
@@ -204,5 +206,21 @@ public class SymbolTable {
       }
     }
     return size;
+  }
+
+  /**
+   * Resets the offset counter to 0
+   * This is needed to reset variable offsets between functions
+   */
+  public void resetOffset() {
+    currentOffset = 0;
+  }
+
+  /**
+   * Gets the current function name
+   * @return The current function name
+   */
+  public String getCurrentFunctionName() {
+    return currentFunctionName;
   }
 }

@@ -11,12 +11,17 @@ j main
 main:
 # Entering a new scope.
 # Symbols in symbol table:
-#  a
 #  println
-#  b
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
+# Entering a new scope.
+# Symbols in symbol table:
+#  a
+#  println
+#  b
+# Update the stack pointer.
+addi $sp $sp -8
 # println
 la $a0 datalabel0
 li $v0 4
@@ -60,6 +65,8 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
+# Exiting scope.
+addi $sp $sp 8
 # Exiting scope.
 addi $sp $sp 0
 li $v0 10

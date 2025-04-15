@@ -29,27 +29,30 @@ public class Assignment extends AbstractNode implements Expression {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    int offset = symbolTable.getOffset(mutable.getId());
-    String addrReg = regAllocator.getAny();
+    String id = mutable.getId();
+    int offset = symbolTable.getOffset(id);
+        String addrReg = regAllocator.getAny();
 
-    // Exact comment format as requested
-    code.append("# Get ").append(mutable.getId())
+    // Get variable's address
+    code.append("# Get ").append(id)
             .append("'s offset from $sp from the symbol table and initialize ")
-            .append(mutable.getId()).append("'s address with it. We'll add $sp later.\n");
+            .append(id).append("'s address with it. We'll add $sp later.\n");
     code.append("li ").append(addrReg).append(" ").append(offset).append("\n");
     code.append("# Add the stack pointer address to the offset.\n");
     code.append("add ").append(addrReg).append(" ").append(addrReg).append(" $sp\n");
 
-    // Handle RHS with exact comments
+    // Handle RHS computation
     code.append("# Compute rhs for assignment =\n");
     MIPSResult rhsResult = rhs.toMIPS(code, data, symbolTable, regAllocator);
     String valReg = rhsResult.getRegister();
 
+    // If result is not in a register, load it
     if (valReg == null) {
       valReg = regAllocator.getAny();
       code.append("lw ").append(valReg).append(" ").append(rhsResult.getAddress()).append("\n");
     }
 
+    // Store the value to memory
     code.append("# complete assignment statement with store\n");
     code.append("sw ").append(valReg).append(" 0(").append(addrReg).append(")\n");
 

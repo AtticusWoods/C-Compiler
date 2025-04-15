@@ -51,10 +51,9 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    symbolTable.setCurrentFunction(id);
-
-    // Add return symbol
-    symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
+    // Create a new symbol table for this function's scope
+    SymbolTable functionTable = new SymbolTable();
+    functionTable.setCurrentFunction(id);
 
     // Function prologue
     code.append("\n# code for ").append(id).append("\n");
@@ -63,17 +62,27 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     // For all functions (including main), add scope entry
     code.append("# Entering a new scope.\n");
     code.append("# Symbols in symbol table:\n");
-    for (String symbol : symbolTable.getSymbols()) {
+    
+    // Add function parameters to the symbol table
+    for (Param param : params) {
+      functionTable.addVariable(param.getId(), param.getType());
+    }
+    
+    // Reset the offset counter for this function
+    functionTable.resetOffset();
+
+    // Print all symbols in this function's scope
+    for (String symbol : functionTable.getSymbols()) {
       code.append("#  ").append(symbol).append("\n");
     }
+
     code.append("# Update the stack pointer.\n");
     code.append("addi $sp $sp -0\n");  // Will be adjusted by compound statements
 
     // Special handling for main function
     if (id.equals("main")) {
-
       // Process function body
-      statement.toMIPS(code, data, symbolTable, regAllocator);
+      statement.toMIPS(code, data, functionTable, regAllocator);
 
       // Main function epilogue
       code.append("# Exiting scope.\n");
@@ -82,7 +91,7 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       code.append("syscall\n");
     } else {
       // Process function body
-      statement.toMIPS(code, data, symbolTable, regAllocator);
+      statement.toMIPS(code, data, functionTable, regAllocator);
 
       // Regular function epilogue
       code.append("# Exiting scope.\n");
@@ -93,3 +102,4 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     return MIPSResult.createVoidResult();
   }
 }
+

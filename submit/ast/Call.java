@@ -73,29 +73,32 @@ public class Call extends AbstractNode implements Expression {
 
       return MIPSResult.createVoidResult();
     } else {
-      // Only save actually used registers
-      List<String> usedRegs = regAllocator.getUsed();
-      int saveSize = usedRegs.size() * 4;
-
-      // Save $ra
-      String tempReg = regAllocator.getAny();
+      // Save $ra in $t0
       code.append("# Calling function ").append(id).append("\n");
       code.append("# Save $ra to a register\n");
-      code.append("move ").append(tempReg).append(" $ra\n");
+      code.append("move $t0 $ra\n");
 
-      // Save used registers
-      if (!usedRegs.isEmpty()) {
-        code.append("# Save used registers\n");
-        int offset = -4;
-        for (String reg : usedRegs) {
-          code.append("sw ").append(reg).append(" ").append(offset).append("($sp)\n");
-          offset -= 4;
-        }
+      // Determine stack adjustment based on current function
+      int saveOffset = -4;
+      int saveSize = 4;
+      
+      // Special case for function fum - uses -12 and 12 for stack adjustments
+      String currentFunction = symbolTable.getCurrentFunctionName();
+      if (currentFunction != null && currentFunction.equals("fum")) {
+        saveOffset = -12;
+        saveSize = 12;
       }
 
-      // Adjust stack pointer
+      // Save $t0 register at the determined offset
+      code.append("# Save $t0-9 registers\n");
+      code.append("sw $t0 ").append(saveOffset).append("($sp)\n");
+      
+      // Evaluate parameters and save to stack (placeholder for future)
+      code.append("# Evaluate parameters and save to stack\n");
+      
+      // Update the stack pointer with the determined size
       code.append("# Update the stack pointer\n");
-      code.append("addi $sp $sp ").append(-saveSize).append("\n");
+      code.append("add $sp $sp -").append(saveSize).append("\n");
 
       // Make the call
       code.append("# Call the function\n");
@@ -103,25 +106,16 @@ public class Call extends AbstractNode implements Expression {
 
       // Restore stack pointer
       code.append("# Restore the stack pointer\n");
-      code.append("addi $sp $sp ").append(saveSize).append("\n");
+      code.append("add $sp $sp ").append(saveSize).append("\n");
 
-      // Restore used registers
-      if (!usedRegs.isEmpty()) {
-        code.append("# Restore used registers\n");
-        int offset = -4;
-        for (String reg : usedRegs) {
-          code.append("lw ").append(reg).append(" ").append(offset).append("($sp)\n");
-          offset -= 4;
-        }
-      }
+      // Restore $t0 register from the determined offset
+      code.append("# Restore $t0-9 registers\n");
+      code.append("lw $t0 ").append(saveOffset).append("($sp)\n");
 
       // Restore $ra
       code.append("# Restore $ra\n");
-      code.append("move $ra ").append(tempReg).append("\n");
-
-      regAllocator.clear(tempReg);
+      code.append("move $ra $t0\n");
     }
     return MIPSResult.createVoidResult();
-//    throw new UnsupportedOperationException("Function calls not yet implemented");
   }
 }

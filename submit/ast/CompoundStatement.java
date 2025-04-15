@@ -35,11 +35,13 @@ public class CompoundStatement extends AbstractNode implements Statement {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable parentSymbolTable, RegisterAllocator regAllocator) {
-    // Create new child scope
-    SymbolTable symbolTable = parentSymbolTable.createChild();
-
+    
+    SymbolTable symbolTable = parentSymbolTable;
+    
     // Calculate total size needed for this scope's variables
     int scopeSize = 0;
+
+    // First pass - add all variables to the symbol table
     for (Statement s : statements) {
       if (s instanceof VarDeclaration) {
         VarDeclaration varDecl = (VarDeclaration) s;
@@ -50,29 +52,9 @@ public class CompoundStatement extends AbstractNode implements Statement {
       }
     }
 
-    // Only print scope info and adjust stack if we have variables
-    if (scopeSize > 0) {
-      code.append("# Entering a new scope.\n");
-      code.append("# Symbols in symbol table:\n");
-      for (String symbol : symbolTable.getSymbols()) {
-        code.append("#  ").append(symbol).append("\n");
-      }
-      code.append("# Update the stack pointer.\n");
-      java.lang.System.out.println(" Scope size: " + scopeSize);
-      java.lang.System.out.println(symbolTable.getSymbols());
-
-      code.append("addi $sp $sp -").append(scopeSize).append("\n");
-    }
-
     // Process all statements in the scope
     for (Statement s : statements) {
       s.toMIPS(code, data, symbolTable, regAllocator);
-    }
-
-    // Clean up scope
-    if (scopeSize > 0) {
-      code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp ").append(scopeSize).append("\n");
     }
 
     return MIPSResult.createVoidResult();

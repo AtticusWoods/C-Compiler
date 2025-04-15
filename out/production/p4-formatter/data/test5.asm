@@ -12,9 +12,7 @@ foo:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  main
 #  return
-#  fum
 # Update the stack pointer.
 addi $sp $sp -0
 # println
@@ -34,18 +32,9 @@ fum:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  foo
-#  main
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
-# Entering a new scope.
-# Symbols in symbol table:
-#  a
-#  println
-#  b
-# Update the stack pointer.
-addi $sp $sp -8
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
 li $t0 -12
 # Add the stack pointer address to the offset.
@@ -87,22 +76,19 @@ syscall
 # Calling function foo
 # Save $ra to a register
 move $t0 $ra
-# Save used registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-sw $t1 -8($sp)
+# Evaluate parameters and save to stack
 # Update the stack pointer
-addi $sp $sp -8
+add $sp $sp -4
 # Call the function
 jal foo
 # Restore the stack pointer
-addi $sp $sp 8
-# Restore used registers
+add $sp $sp 4
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-lw $t1 -8($sp)
 # Restore $ra
 move $ra $t0
-# Exiting scope.
-addi $sp $sp 8
 # Exiting scope.
 addi $sp $sp 0
 jr $ra
@@ -112,9 +98,7 @@ main:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  foo
 #  return
-#  fum
 # Update the stack pointer.
 addi $sp $sp -0
 # println
@@ -127,35 +111,33 @@ syscall
 # Calling function foo
 # Save $ra to a register
 move $t0 $ra
-# Save used registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-sw $t1 -8($sp)
+# Evaluate parameters and save to stack
 # Update the stack pointer
-addi $sp $sp -8
+add $sp $sp -4
 # Call the function
 jal foo
 # Restore the stack pointer
-addi $sp $sp 8
-# Restore used registers
+add $sp $sp 4
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-lw $t1 -8($sp)
 # Restore $ra
 move $ra $t0
 # Calling function fum
 # Save $ra to a register
 move $t0 $ra
-# Save used registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-sw $t1 -8($sp)
+# Evaluate parameters and save to stack
 # Update the stack pointer
-addi $sp $sp -8
+add $sp $sp -4
 # Call the function
 jal fum
 # Restore the stack pointer
-addi $sp $sp 8
-# Restore used registers
+add $sp $sp 4
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-lw $t1 -8($sp)
 # Restore $ra
 move $ra $t0
 # Exiting scope.
