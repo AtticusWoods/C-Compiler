@@ -16,7 +16,6 @@ identity:
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
-# Return statement
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -40,7 +39,6 @@ add:
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
-# Return statement
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -95,7 +93,6 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
 li $v0, 1
 syscall
 la $a0 newline
@@ -122,7 +119,6 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
 li $v0, 1
 syscall
 la $a0 newline

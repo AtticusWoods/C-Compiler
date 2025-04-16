@@ -156,7 +156,7 @@ public class Call extends AbstractNode implements Expression {
         // Get a temporary register to hold the return value (which is in $v0)
         String returnReg = regAllocator.getT();
         code.append("# Save return value from $v0\n");
-        code.append("move ").append(returnReg).append(", $v0\n");
+//        code.append("move ").append(returnReg).append(", $v0\n");
         
         // Return a register result with the return type
         return MIPSResult.createRegisterResult(returnReg, returnType);

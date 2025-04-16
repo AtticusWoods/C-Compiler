@@ -17,13 +17,12 @@ identity:
 # Update the stack pointer.
 addi $sp $sp -0
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t1 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of x.
-lw $t1 0($t0)
-sw $t1, 0($sp)
-move $v0, $t1
+lw $t0 0($t1)
+sw $t0 -8($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -40,20 +39,19 @@ add:
 # Update the stack pointer.
 addi $sp $sp -0
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t1 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of x.
-lw $t1 0($t0)
+lw $t0 0($t1)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t0 -8
+li $t2 -8
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of y.
-lw $t2 0($t0)
-add $t1 $t1 $t2
-sw $t1, 0($sp)
-move $v0, $t1
+lw $t1 0($t2)
+add $t0 $t0 $t1
+sw $t0 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -93,8 +91,10 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
-li $v0, 1
+# Get return value off stack
+lw $t0 -12($sp)
+move $a0 $t0
+li $v0 1
 syscall
 la $a0 newline
 li $v0 4
@@ -120,8 +120,10 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
-li $v0, 1
+# Get return value off stack
+lw $t0 -16($sp)
+move $a0 $t0
+li $v0 1
 syscall
 la $a0 newline
 li $v0 4
