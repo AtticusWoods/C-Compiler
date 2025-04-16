@@ -69,19 +69,20 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     // We need to find all variables before printing the symbol table
     extractVariableDeclarations(statement, functionTable);
 
-    code.append("# Symbols in symbol table:\n");
-
-    // Add function parameters to the symbol table
-    for (Param param : params) {
-      functionTable.addVariable(param.getId(), param.getType());
+    // Add function parameters to the symbol table with correct offsets
+    for (int i = 0; i < params.size(); i++) {
+      Param param = params.get(i);
+      // Use the new addParameter method with position (1-indexed)
+      functionTable.addParameter(param.getId(), param.getType(), i + 1);
     }
 
+    code.append("# Symbols in symbol table:\n");
+    
     // Print all symbols in this function's scope
     for (String symbol : functionTable.getSymbols()) {
       code.append("#  ").append(symbol).append("\n");
     }
 
-    
     code.append("# Update the stack pointer.\n");
     code.append("addi $sp $sp -0\n");
 
@@ -107,68 +108,6 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
 
     return MIPSResult.createVoidResult();
   }
-
-//  @Override
-//  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
-//                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
-//    // Create a new symbol table for this function's scope
-//    SymbolTable functionTable = new SymbolTable();
-//    functionTable.setCurrentFunction(id);
-//
-//    // Function prologue
-//    code.append("\n# code for ").append(id).append("\n");
-//    code.append(id).append(":\n");
-//
-//    // For all functions (including main), add scope entry
-//    code.append("# Entering a new scope.\n");
-//
-//    // Reset the offset counter for this function
-//    functionTable.resetOffset();
-//
-//    // Process the function body to collect variable declarations
-//    // We need to find all variables before printing the symbol table
-//    extractVariableDeclarations(statement, functionTable);
-//
-//    code.append("# Symbols in symbol table:\n");
-//
-//    // Add function parameters to the symbol table
-//    for (Param param : params) {
-//      functionTable.addVariable(param.getId(), param.getType());
-//    }
-//
-//    // Print all symbols in this function's scope
-//    for (String symbol : functionTable.getSymbols()) {
-//      code.append("#  ").append(symbol).append("\n");
-//    }
-//
-//    // Calculate total size needed for local variables (4 bytes per variable)
-//    int localVarsSize = functionTable.getActivationRecordSize();
-//
-//    code.append("# Update the stack pointer.\n");
-//    code.append("addi $sp $sp -").append(localVarsSize).append("\n");
-//
-//    // Special handling for main function
-//    if (id.equals("main")) {
-//      // Process function body
-//      statement.toMIPS(code, data, functionTable, regAllocator);
-//
-//      // Main function epilogue
-//      code.append("# Exiting scope.\n");
-//      code.append("addi $sp $sp ").append(localVarsSize).append("\n");
-//      code.append("li $v0 10\n");  // Exit syscall
-//      code.append("syscall\n");
-//    } else {
-//      // Process function body
-//      statement.toMIPS(code, data, functionTable, regAllocator);
-//
-//      // Regular function epilogue
-//      code.append("# Exiting scope.\n");
-//      code.append("addi $sp $sp ").append(localVarsSize).append("\n");
-//      code.append("jr $ra\n");  // Return to caller
-//    }
-//
-//    return MIPSResult.createVoidResult();
-//  }
   
   /**
    * Extract variable declarations from a compound statement to populate the symbol table

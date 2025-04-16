@@ -30,12 +30,9 @@ public class Mutable extends AbstractNode implements Expression, Node {
     // Get the offset from the symbol table
     int offset = symbolTable.getOffset(id);
 
-    // Always use a fresh register for the address
-    String addrReg = regAllocator.getT();
-    
-    // Always use a different register for the result
-    // This prevents overwriting previously loaded values
-    String resultReg = regAllocator.getT();
+    // Get available registers from the register allocator
+    String addrReg = regAllocator.getAny();
+    String valueReg = regAllocator.getAny();
 
     // Generate comments for clarity in assembly code
     code.append("# Get " + id + "'s offset from $sp from the symbol table and initialize "
@@ -44,12 +41,12 @@ public class Mutable extends AbstractNode implements Expression, Node {
     code.append("# Add the stack pointer address to the offset.\n");
     code.append("add ").append(addrReg).append(" ").append(addrReg).append(" $sp\n");
     code.append("# Load the value of " + id + ".\n");
-    code.append("lw ").append(resultReg).append(" 0(").append(addrReg).append(")\n");
+    code.append("lw ").append(valueReg).append(" 0(").append(addrReg).append(")\n");
 
     // Free the address register since we no longer need it
-      regAllocator.clear(addrReg);
+    regAllocator.clear(addrReg);
         
-    return MIPSResult.createRegisterResult(resultReg, VarType.INT);
+    return MIPSResult.createRegisterResult(valueReg, VarType.INT);
   }
 
   public String getId() {

@@ -36,7 +36,7 @@ fum:
 #  b
 #  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -92,7 +92,7 @@ lw $t0 -12($sp)
 # Restore $ra
 move $ra $t0
 # Exiting scope.
-addi $sp $sp 8
+addi $sp $sp 0
 jr $ra
 
 # code for main

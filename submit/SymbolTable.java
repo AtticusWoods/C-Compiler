@@ -172,20 +172,37 @@ public class SymbolTable {
     this.currentFunctionName = name;
   }
 
-  // Add this method to add variables with offsets
+  // Add this method to handle function parameters specifically
+  public void addParameter(String id, VarType type, int paramPosition) {
+    // Calculate offset for parameters: first param at -4, second at -8, etc.
+    int offset = -4 * paramPosition;
+    table.put(id, new SymbolInfo(id, type, false, offset));
+    activationRecordSize += 4;
+  }
+
+  // Modify the addVariable method to only be used for local variables
   public void addVariable(String id, VarType type) {
-    int variableCount = 0;
+    // Count parameters in this scope to determine starting offset for local variables
+    int paramCount = 0;
+    int localVarCount = 0;
     
-    // Count only non-function symbols that aren't system defined (println, return)
     for (String symbol : table.keySet()) {
+      SymbolInfo info = table.get(symbol);
       if (!symbol.equals("println") && !symbol.equals("return") && 
-          !symbol.equals(currentFunctionName)) {
-        variableCount++;
+          !symbol.equals(currentFunctionName) && !info.isFunction()) {
+        // If it's already in the table and has a negative offset, count it
+        if (info.getOffset() < 0) {
+          if (info.getOffset() >= -12) { // Parameters typically have smaller offsets
+            paramCount++;
+          } else {
+            localVarCount++;
+          }
+        }
       }
     }
     
-    // Calculate offset starting from -4 and decreasing by 4 for each additional variable
-    int offset = -4 * (variableCount + 1);
+    // Calculate offset starting after parameters
+    int offset = -4 * (paramCount + localVarCount + 1);
     table.put(id, new SymbolInfo(id, type, false, offset));
     activationRecordSize += 4;
   }

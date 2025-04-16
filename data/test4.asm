@@ -16,7 +16,7 @@ main:
 #  b
 #  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # println
 la $a0 datalabel0
 li $v0 4
@@ -134,7 +134,7 @@ la $a0 newline
 li $v0 4
 syscall
 # Exiting scope.
-addi $sp $sp 8
+addi $sp $sp 0
 li $v0 10
 syscall
 

@@ -37,66 +37,32 @@ public class BinaryOperator extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
-                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
-        // Evaluate left operand first
-    MIPSResult lhsResult = lhs.toMIPS(code, data, symbolTable, regAllocator);
-    String lhsReg = lhsResult.getRegister();
-
-    // Evaluate right operand
-    MIPSResult rhsResult = rhs.toMIPS(code, data, symbolTable, regAllocator);
-    String rhsReg = rhsResult.getRegister();
-
-    // Ensure left operand is in a register
-    if (lhsReg == null) {
-      lhsReg = regAllocator.getT();
-      if (lhsResult.getAddress() != null) {
-        code.append("lw ").append(lhsReg).append(" ").append(lhsResult.getAddress()).append("\n");
-      } else if (lhs instanceof NumConstant) {
-        code.append("li ").append(lhsReg).append(" ").append(((NumConstant)lhs).getValue()).append("\n");
-      }
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, 
+                          SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    MIPSResult leftRes = lhs.toMIPS(code, data, symbolTable, regAllocator);
+    
+    // Remember the left operand's register
+    String leftReg = leftRes.getRegister();
+    
+    // Generate code for the right operand
+    MIPSResult rightRes = rhs.toMIPS(code, data, symbolTable, regAllocator);
+    String rightReg = rightRes.getRegister();
+    
+    if (type == BinaryOperatorType.PLUS) {
+        code.append("add ").append(leftReg).append(" ").append(leftReg).append(" ").append(rightReg).append("\n");
+    } else if (type == BinaryOperatorType.MINUS) {
+        code.append("sub ").append(leftReg).append(" ").append(leftReg).append(" ").append(rightReg).append("\n");
+    } else if (type == BinaryOperatorType.TIMES) {
+        code.append("mult ").append(leftReg).append(" ").append(rightReg).append("\n");
+        code.append("mflo ").append(leftReg).append("\n");
+    } else if (type == BinaryOperatorType.DIVIDE) {
+        code.append("div ").append(leftReg).append(" ").append(rightReg).append("\n");
+        code.append("mflo ").append(leftReg).append("\n");
     }
-
-    // Ensure right operand is in a register
-    if (rhsReg == null) {
-      rhsReg = regAllocator.getT();
-      if (rhsResult.getAddress() != null) {
-        code.append("lw ").append(rhsReg).append(" ").append(rhsResult.getAddress()).append("\n");
-      } else if (rhs instanceof NumConstant) {
-        code.append("li ").append(rhsReg).append(" ").append(((NumConstant)rhs).getValue()).append("\n");
-      }
-    }
-
-    // Use lhsReg as the result register
-    String resultReg = lhsReg;
-
-    // Generate the operation
-    switch (type) {
-      case PLUS:
-        code.append("add ").append(resultReg).append(" ")
-                .append(lhsReg).append(" ").append(rhsReg).append("\n");
-        break;
-      case MINUS:
-        code.append("sub ").append(resultReg).append(" ")
-                .append(lhsReg).append(" ").append(rhsReg).append("\n");
-        break;
-      case TIMES:
-        code.append("mult ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-        code.append("mflo ").append(resultReg).append("\n");
-        break;
-      case DIVIDE:
-        code.append("div ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-        code.append("mflo ").append(resultReg).append("\n");
-        break;
-      default:
-        throw new UnsupportedOperationException("Operator not implemented: " + type);
-    }
-
-    // Clean up registers that are no longer needed
-    if (!rhsReg.equals(resultReg)) {
-      regAllocator.clear(rhsReg);
-    }
-
-    return MIPSResult.createRegisterResult(resultReg, VarType.INT);
+    
+    // Free the right operand's register since we no longer need it
+    regAllocator.clear(rightReg);
+    
+    return MIPSResult.createRegisterResult(leftReg, VarType.INT);
   }
 }
