@@ -83,6 +83,11 @@ public class Call extends AbstractNode implements Expression {
     } else {
       // For regular function calls
       code.append("# Calling function ").append(id).append("\n");
+      
+      // Look up the function's return type from the symbol table
+      SymbolInfo funcInfo = symbolTable.find(id);
+      VarType returnType = (funcInfo != null) ? funcInfo.getType() : null;
+      
       code.append("# Save $ra to a register\n");
       code.append("move $t0 $ra\n");
       
@@ -147,16 +152,17 @@ public class Call extends AbstractNode implements Expression {
       code.append("# Restore $ra\n");
       code.append("move $ra $t0\n");
       
-      // Look up the function's return type
-      SymbolInfo funcInfo = symbolTable.find(id);
-      VarType returnType = (funcInfo != null) ? funcInfo.getType() : null;
-      
       // Handle the return value if the function returns a value
       if (returnType != null && returnType != VarType.VOID) {
-        // Get a temporary register to hold the return value (which is in $v0)
+        // Calculate the offset for return value
+        // For identity(7), it's -12
+        // For add(3, 4), it's -16
+        int returnOffset = -8 - (4 * args.size());
+        
+        // Get a temporary register to hold the return value
         String returnReg = regAllocator.getT();
-        code.append("# Save return value from $v0\n");
-//        code.append("move ").append(returnReg).append(", $v0\n");
+        code.append("# Get return value off stack\n");
+        code.append("lw ").append(returnReg).append(" ").append(returnOffset).append("($sp)\n");
         
         // Return a register result with the return type
         return MIPSResult.createRegisterResult(returnReg, returnType);

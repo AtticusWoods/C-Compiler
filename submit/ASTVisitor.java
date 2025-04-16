@@ -65,6 +65,9 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
             params.add((Param) visitParam(p));
         }
         
+        // Register the function with its return type in the global symbol table
+        symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
+        
         // Create a child symbol table for the function body
         symbolTable = symbolTable.createChild();
         
@@ -80,7 +83,6 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         // Return to the parent symbol table
         symbolTable = symbolTable.getParent();
         
-        symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
         return new FunDeclaration(returnType, id, params, statement);
     }
 

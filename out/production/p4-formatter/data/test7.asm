@@ -23,7 +23,6 @@ add $t0 $t0 $sp
 # Load the value of x.
 lw $t1 0($t0)
 sw $t1, 0($sp)
-move $v0, $t1
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -53,7 +52,6 @@ add $t0 $t0 $sp
 lw $t2 0($t0)
 add $t1 $t1 $t2
 sw $t1, 0($sp)
-move $v0, $t1
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -93,6 +91,7 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+move $a0, $v0
 li $v0, 1
 syscall
 la $a0 newline
@@ -119,6 +118,7 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+move $a0, $v0
 li $v0, 1
 syscall
 la $a0 newline
