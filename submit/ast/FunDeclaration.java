@@ -49,64 +49,57 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
-                           SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    // Create a new symbol table for this function's scope
-    SymbolTable functionTable = new SymbolTable();
-    functionTable.setCurrentFunction(id);
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, 
+                          SymbolTable symbolTable, RegisterAllocator regAllocator) {
+      // Function prologue
+      code.append("\n# code for ").append(id).append("\n");
+      code.append(id).append(":\n");
+      code.append("# Entering a new scope.\n");
+      
+      // Set current function name
+      symbolTable.setCurrentFunction(id);
+      
+      // Reset the offset counter
+      symbolTable.resetOffset();
+      
+      // Add function parameters to the symbol table with correct offsets
+      for (int i = 0; i < params.size(); i++) {
+          Param param = params.get(i);
+          symbolTable.addParameter(param.getId(), param.getType(), i + 1);
+      }
 
-    // Function prologue
-    code.append("\n# code for ").append(id).append("\n");
-    code.append(id).append(":\n");
+      // Process the function body to collect variable declarations
+      extractVariableDeclarations(statement, symbolTable);
+      
+      code.append("# Symbols in symbol table:\n");
+      for (String symbol : symbolTable.getSymbols()) {
+          code.append("#  ").append(symbol).append("\n");
+      }
 
-    // For all functions (including main), add scope entry
-    code.append("# Entering a new scope.\n");
+      code.append("# Update the stack pointer.\n");
+      code.append("addi $sp $sp -0\n");
 
-    // Reset the offset counter for this function
-    functionTable.resetOffset();
+      // Special handling for main function
+      if (id.equals("main")) {
+          // Process function body
+          statement.toMIPS(code, data, symbolTable, regAllocator);
 
-    // Process the function body to collect variable declarations
-    // We need to find all variables before printing the symbol table
-    extractVariableDeclarations(statement, functionTable);
+          // Main function epilogue
+          code.append("# Exiting scope.\n");
+          code.append("addi $sp $sp 0\n");
+          code.append("li $v0 10\n");  // Exit syscall
+          code.append("syscall\n");
+      } else {
+          // Process function body
+          statement.toMIPS(code, data, symbolTable, regAllocator);
 
-    // Add function parameters to the symbol table with correct offsets
-    for (int i = 0; i < params.size(); i++) {
-      Param param = params.get(i);
-      // Use the new addParameter method with position (1-indexed)
-      functionTable.addParameter(param.getId(), param.getType(), i + 1);
-    }
+          // Regular function epilogue
+          code.append("# Exiting scope.\n");
+          code.append("addi $sp $sp 0\n");
+          code.append("jr $ra\n");  // Return to caller
+      }
 
-    code.append("# Symbols in symbol table:\n");
-    
-    // Print all symbols in this function's scope
-    for (String symbol : functionTable.getSymbols()) {
-      code.append("#  ").append(symbol).append("\n");
-    }
-
-    code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -0\n");
-
-    // Special handling for main function
-    if (id.equals("main")) {
-      // Process function body
-      statement.toMIPS(code, data, functionTable, regAllocator);
-
-      // Main function epilogue
-      code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp 0\n");
-      code.append("li $v0 10\n");  // Exit syscall
-      code.append("syscall\n");
-    } else {
-      // Process function body
-      statement.toMIPS(code, data, functionTable, regAllocator);
-
-      // Regular function epilogue
-      code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp 0\n");
-      code.append("jr $ra\n");  // Return to caller
-    }
-
-    return MIPSResult.createVoidResult();
+      return MIPSResult.createVoidResult();
   }
   
   /**

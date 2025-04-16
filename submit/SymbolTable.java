@@ -35,16 +35,27 @@ public class SymbolTable {
     usedSRegisters = new HashSet<>();
     activationRecordSize = 0;
 
-    // Add println() as a built-in function
-    addSymbol("println", new SymbolInfo("println", VarType.VOID, true));
-    // Add return symbol
-    addSymbol("return", new SymbolInfo("return", null, true));
+    // Add println() as a built-in function in root table only
+    if (parent == null) {
+        addSymbol("println", new SymbolInfo("println", VarType.VOID, true));
+    }
+    // Add return symbol as a non-function symbol
+    addSymbol("return", new SymbolInfo("return", null, false));
   }
 
 
   public void addSymbol(String id, SymbolInfo symbol) {
-    table.put(id, symbol);
-//    java.lang.System.out.println(table);
+    // For functions, always add to root table
+    if (symbol.isFunction()) {
+      SymbolTable rootTable = this;
+      while (rootTable.parent != null) {
+        rootTable = rootTable.parent;
+      }
+      rootTable.table.put(id, symbol);
+    } else {
+      // For variables, add to current scope
+      table.put(id, symbol);
+    }
   }
 
   /**
@@ -55,12 +66,26 @@ public class SymbolTable {
    * @return
    */
   public SymbolInfo find(String id) {
+    // First check current scope
     if (table.containsKey(id)) {
       return table.get(id);
     }
+
+    // For functions, check root scope first
+    SymbolTable rootTable = this;
+    while (rootTable.parent != null) {
+      rootTable = rootTable.parent;
+    }
+    SymbolInfo rootInfo = rootTable.table.get(id);
+    if (rootInfo != null && rootInfo.isFunction()) {
+      return rootInfo;
+    }
+
+    // For variables, check parent scopes
     if (parent != null) {
       return parent.find(id);
     }
+
     return null;
   }
 

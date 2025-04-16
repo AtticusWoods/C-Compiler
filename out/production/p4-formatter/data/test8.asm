@@ -51,50 +51,58 @@ addi $sp $sp -0
 # Save $ra to a register
 move $t0 $ra
 # Save $t0-9 registers
-sw $t0 -12($sp)
+sw $t0 -4($sp)
 # Evaluate parameters and save to stack
 # Calling function add
 # Save $ra to a register
-move $t0 $ra
+move $t1 $ra
 # Save $t0-9 registers
-sw $t0 -12($sp)
+sw $t1 -4($sp)
+sw $t0 -8($sp)
 # Evaluate parameters and save to stack
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t2 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of x.
-lw $t1 0($t0)
-sw $t1 -16($sp)
+lw $t3 0($t2)
+sw $t3 -20($sp)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t0 -8
+li $t2 -8
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of y.
-lw $t1 0($t0)
-sw $t1 -20($sp)
+lw $t3 0($t2)
+sw $t3 -24($sp)
 # Update the stack pointer
-add $sp $sp -12
+add $sp $sp -20
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 12
+add $sp $sp 20
 # Restore $t0-9 registers
-lw $t0 -12($sp)
+lw $t0 -8($sp)
+lw $t1 -4($sp)
 # Restore $ra
-move $ra $t0
+move $ra $t1
+# Looking for function: add
+# WARNING: Function add not found in symbol table
+move $t1, $v0
+sw $t1 -16($sp)
 li $t1 1
 sw $t1 -20($sp)
 # Update the stack pointer
-add $sp $sp -12
+add $sp $sp -16
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 12
+add $sp $sp 16
 # Restore $t0-9 registers
-lw $t0 -12($sp)
+lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+# Looking for function: add
+# WARNING: Function add not found in symbol table
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -123,19 +131,21 @@ move $t0 $ra
 sw $t0 -4($sp)
 # Evaluate parameters and save to stack
 li $t1 2
-sw $t1 -8($sp)
+sw $t1 -16($sp)
 li $t1 4
-sw $t1 -12($sp)
+sw $t1 -20($sp)
 # Update the stack pointer
-add $sp $sp -4
+add $sp $sp -16
 # Call the function
 jal add2
 # Restore the stack pointer
-add $sp $sp 4
+add $sp $sp 16
 # Restore $t0-9 registers
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+# Looking for function: add2
+# WARNING: Function add2 not found in symbol table
 move $a0, $v0
 li $v0, 1
 syscall

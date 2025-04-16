@@ -27,12 +27,29 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         return (t.equals("int")) ? VarType.INT : (t.equals("bool")) ? VarType.BOOL : VarType.CHAR;
     }
 
-    @Override public Node visitProgram(CminusParser.ProgramContext ctx) {
+    @Override 
+    public Node visitProgram(CminusParser.ProgramContext ctx) {
         symbolTable = new SymbolTable();
         List<Declaration> decls = new ArrayList<>();
+        
+        // First pass: Register all function declarations in the root symbol table
+        for (CminusParser.DeclarationContext d : ctx.declaration()) {
+            if (d.funDeclaration() != null) {
+                CminusParser.FunDeclarationContext funDecl = d.funDeclaration();
+                String id = funDecl.ID().getText();
+                VarType returnType = null;
+                if (funDecl.typeSpecifier() != null) {
+                    returnType = getVarType(funDecl.typeSpecifier());
+                }
+                symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
+            }
+        }
+        
+        // Second pass: Process all declarations normally
         for (CminusParser.DeclarationContext d : ctx.declaration()) {
             decls.add((Declaration) visitDeclaration(d));
         }
+        
         return new Program(decls);
     }
 
@@ -54,7 +71,8 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         return new VarDeclaration(type, ids, arraySizes, isStatic);
     }
 
-    @Override public Node visitFunDeclaration(CminusParser.FunDeclarationContext ctx) {
+    @Override 
+    public Node visitFunDeclaration(CminusParser.FunDeclarationContext ctx) {
         VarType returnType = null;
         if (ctx.typeSpecifier() != null) {
             returnType = getVarType(ctx.typeSpecifier());
@@ -65,16 +83,26 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
             params.add((Param) visitParam(p));
         }
         
-        // Register the function with its return type in the global symbol table
-        symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
+        // Find the root symbol table
+        SymbolTable rootTable = symbolTable;
+        while (rootTable.getParent() != null) {
+            rootTable = rootTable.getParent();
+        }
+        
+        // Register the function in the root symbol table
+        rootTable.addSymbol(id, new SymbolInfo(id, returnType, true));
         
         // Create a child symbol table for the function body
-        symbolTable = symbolTable.createChild();
+        SymbolTable functionTable = rootTable.createChild();
+        symbolTable = functionTable;
+        
+        // Set current function name in the function's symbol table
+        functionTable.setCurrentFunction(id);
         
         // Add a special "return" symbol to the function's symbol table
         // This creates a space on the stack to store the return value
         if (returnType != null) {
-            symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
+            functionTable.addSymbol("return", new SymbolInfo("return", returnType, false));
         }
         
         // Visit the function body
