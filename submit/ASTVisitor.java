@@ -64,7 +64,22 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         for (CminusParser.ParamContext p : ctx.param()) {
             params.add((Param) visitParam(p));
         }
+        
+        // Create a child symbol table for the function body
+        symbolTable = symbolTable.createChild();
+        
+        // Add a special "return" symbol to the function's symbol table
+        // This creates a space on the stack to store the return value
+        if (returnType != null) {
+            symbolTable.addSymbol("return", new SymbolInfo("return", returnType, false));
+        }
+        
+        // Visit the function body
         Statement statement = (Statement) visitStatement(ctx.statement());
+        
+        // Return to the parent symbol table
+        symbolTable = symbolTable.getParent();
+        
         symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
         return new FunDeclaration(returnType, id, params, statement);
     }

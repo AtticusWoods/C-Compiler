@@ -48,4 +48,7 @@ public class SymbolInfo {
   }
 
 
+  public VarType getType() {
+    return type;
+  }
 }
