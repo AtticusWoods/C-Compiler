@@ -93,32 +93,29 @@ public class Call extends AbstractNode implements Expression {
       // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
       
-      // For simple integer literals in the test cases, handle directly
-      if (args.size() == 2 && id.equals("add")) {
-        // This is for the specific case in test6.c where we call add(3, 4)
-        if (args.get(0) instanceof NumConstant) {
-          NumConstant num = (NumConstant) args.get(0);
-          code.append("li $t1 ").append(num.getValue()).append("\n");
-          code.append("sw $t1 ").append(paramOffset).append("($sp)\n");
-        } else {
-          // Handle variable as parameter
-          MIPSResult paramResult = args.get(0).toMIPS(code, data, symbolTable, regAllocator);
-          if (paramResult.getRegister() != null) {
-            code.append("sw ").append(paramResult.getRegister()).append(" ").append(paramOffset).append("($sp)\n");
-            regAllocator.clear(paramResult.getRegister());
-          }
-        }
+      // General case: handle any function with any number of arguments
+      for (int i = 0; i < args.size(); i++) {
+        // Calculate the current parameter's offset (4 bytes per parameter)
+        int currentParamOffset = paramOffset - (4 * i);
+        Expression arg = args.get(i);
         
-        if (args.get(1) instanceof NumConstant) {
-          NumConstant num = (NumConstant) args.get(1);
+        if (arg instanceof NumConstant) {
+          // Handle numeric constants directly
+          NumConstant num = (NumConstant) arg;
           code.append("li $t1 ").append(num.getValue()).append("\n");
-          code.append("sw $t1 ").append(paramOffset - 4).append("($sp)\n");
+          code.append("sw $t1 ").append(currentParamOffset).append("($sp)\n");
         } else {
-          // Handle variable as parameter
-          MIPSResult paramResult = args.get(1).toMIPS(code, data, symbolTable, regAllocator);
+          // Handle any other type of expression as parameter
+          MIPSResult paramResult = arg.toMIPS(code, data, symbolTable, regAllocator);
           if (paramResult.getRegister() != null) {
-            code.append("sw ").append(paramResult.getRegister()).append(" ").append(paramOffset - 4).append("($sp)\n");
+            code.append("sw ").append(paramResult.getRegister()).append(" ").append(currentParamOffset).append("($sp)\n");
             regAllocator.clear(paramResult.getRegister());
+          } else if (paramResult.getAddress() != null) {
+            // Handle address-based parameters (like strings)
+            String tempReg = regAllocator.getT();
+            code.append("la ").append(tempReg).append(" ").append(paramResult.getAddress()).append("\n");
+            code.append("sw ").append(tempReg).append(" ").append(currentParamOffset).append("($sp)\n");
+            regAllocator.clear(tempReg);
           }
         }
       }
