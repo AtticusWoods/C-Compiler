@@ -84,55 +84,105 @@ public class Call extends AbstractNode implements Expression {
       // For regular function calls
       code.append("# Calling function ").append(id).append("\n");
       
-      // Look up the function's return type from the symbol table
-      SymbolInfo funcInfo = symbolTable.find(id);
-      VarType returnType = (funcInfo != null) ? funcInfo.getType() : null;
-      
+      // Save $ra to a register
       code.append("# Save $ra to a register\n");
-      code.append("move $t0 $ra\n");
+      String raReg = regAllocator.getT();
+      code.append("move ").append(raReg).append(" $ra\n");
       
       // Calculate stack offset based on local variables in the calling function
       int localVarsSize = symbolTable.getActivationRecordSize();
       
       // Stack offsets for saving registers and parameters
-      int saveOffset = -4 - localVarsSize; // Account for local variables
-      int saveSize = 4 + localVarsSize;    // Account for local variables
-      int paramOffset = saveOffset - 4;    // Start parameters after saved registers
+      int saveOffset = -4 - localVarsSize;     // Account for local variables
+      int saveSize = 4 + localVarsSize;        // Account for local variables
+      int paramOffset = saveOffset - 4;        // Start parameters after saved registers
+      int usedTRegs = regAllocator.getUsedTRegCount(); // Number of t registers currently in use
       
       code.append("# Save $t0-9 registers\n");
-      code.append("sw $t0 ").append(saveOffset).append("($sp)\n");
+      code.append("sw ").append(raReg).append(" ").append(saveOffset).append("($sp)\n");
+      
+      // Save additional t-registers if there are nested function calls
+      for(int i = 0; i < usedTRegs; i++) {
+          String reg = "$t" + i;
+          if(!reg.equals(raReg)) { // Don't save the same register twice
+              code.append("sw ").append(reg).append(" ").append(saveOffset - 4 * (i + 1)).append("($sp)\n");
+          }
+      }
       
       // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
       
       // General case: handle any function with any number of arguments
       for (int i = 0; i < args.size(); i++) {
-        // Calculate the current parameter's offset (4 bytes per parameter)
-        int currentParamOffset = paramOffset - (4 * i);
         Expression arg = args.get(i);
         
-        if (arg instanceof NumConstant) {
-          // Handle numeric constants directly
-          NumConstant num = (NumConstant) arg;
-          code.append("li $t1 ").append(num.getValue()).append("\n");
-          code.append("sw $t1 ").append(currentParamOffset).append("($sp)\n");
-        } else {
-          // Handle any other type of expression as parameter
-          MIPSResult paramResult = arg.toMIPS(code, data, symbolTable, regAllocator);
-          if (paramResult.getRegister() != null) {
-            code.append("sw ").append(paramResult.getRegister()).append(" ").append(currentParamOffset).append("($sp)\n");
-            regAllocator.clear(paramResult.getRegister());
-          } else if (paramResult.getAddress() != null) {
-            // Handle address-based parameters (like strings)
-            String tempReg = regAllocator.getT();
-            code.append("la ").append(tempReg).append(" ").append(paramResult.getAddress()).append("\n");
-            code.append("sw ").append(tempReg).append(" ").append(currentParamOffset).append("($sp)\n");
+        // For nested function calls or complex expressions, evaluate them first
+        if (arg instanceof Call || arg instanceof BinaryOperator) {
+            MIPSResult argResult = arg.toMIPS(code, data, symbolTable, regAllocator);
+            String tempReg;
+            
+            if (argResult.getRegister() != null) {
+                tempReg = argResult.getRegister();
+            } else {
+                // If no register was returned but we have a value
+                tempReg = regAllocator.getT();
+                // Move value to temp register
+                code.append("move ").append(tempReg).append(", $v0\n");
+            }
+            
+            // Store parameter on stack
+            code.append("sw ").append(tempReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
             regAllocator.clear(tempReg);
-          }
+        }
+        // Handle simple parameters (constants, variables)
+        else if (arg instanceof NumConstant) {
+            // Handle numeric constants directly
+            NumConstant num = (NumConstant) arg;
+            String tempReg = regAllocator.getT();
+            code.append("li ").append(tempReg).append(" ").append(num.getValue()).append("\n");
+            code.append("sw ").append(tempReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
+            regAllocator.clear(tempReg);
+        }
+        // Handle variable parameters - need to load them from their memory locations
+        else if (arg instanceof Mutable) {
+            Mutable mutable = (Mutable) arg;
+            SymbolInfo varInfo = symbolTable.find(mutable.getId());
+            
+            if (varInfo != null) {
+                // Load variable from its memory location
+                String addrReg = regAllocator.getT();
+                String valueReg = regAllocator.getT();
+                
+                code.append("# Get ").append(mutable.getId()).append("'s offset from $sp from the symbol table and initialize ").append(mutable.getId()).append("'s address with it. We'll add $sp later.\n");
+                code.append("li ").append(addrReg).append(" ").append(varInfo.getOffset()).append("\n");
+                code.append("# Add the stack pointer address to the offset.\n");
+                code.append("add ").append(addrReg).append(" ").append(addrReg).append(" $sp\n");
+                code.append("# Load the value of ").append(mutable.getId()).append(".\n");
+                code.append("lw ").append(valueReg).append(" 0(").append(addrReg).append(")\n");
+                
+                code.append("sw ").append(valueReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
+                regAllocator.clear(addrReg);
+                regAllocator.clear(valueReg);
+            }
+        }
+        else {
+            // Any other type of expression as parameter
+            MIPSResult paramResult = arg.toMIPS(code, data, symbolTable, regAllocator);
+            if (paramResult.getRegister() != null) {
+                code.append("sw ").append(paramResult.getRegister()).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
+                regAllocator.clear(paramResult.getRegister());
+            } else if (paramResult.getAddress() != null) {
+                // Handle address-based parameters (like strings)
+                String tempReg = regAllocator.getT();
+                code.append("la ").append(tempReg).append(" ").append(paramResult.getAddress()).append("\n");
+                code.append("sw ").append(tempReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
+                regAllocator.clear(tempReg);
+            }
         }
       }
       
-      // Update stack pointer
+      // Update stack pointer before call
+      int totalSaveSize = saveSize + 4 * usedTRegs;
       code.append("# Update the stack pointer\n");
       code.append("add $sp $sp -").append(saveSize).append("\n");
       
@@ -140,23 +190,34 @@ public class Call extends AbstractNode implements Expression {
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
       
-      // Restore stack pointer
+      // Restore stack pointer after call
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(saveSize).append("\n");
       
-      // Restore $t0 register
+      // Restore all saved registers
       code.append("# Restore $t0-9 registers\n");
-      code.append("lw $t0 ").append(saveOffset).append("($sp)\n");
+      code.append("lw ").append(raReg).append(" ").append(saveOffset).append("($sp)\n");
+      
+      // Restore additional t-registers if they were saved
+      for(int i = 0; i < usedTRegs; i++) {
+          String reg = "$t" + i;
+          if(!reg.equals(raReg)) { // Don't restore the same register twice
+              code.append("lw ").append(reg).append(" ").append(saveOffset - 4 * (i + 1)).append("($sp)\n");
+          }
+      }
       
       // Restore $ra
       code.append("# Restore $ra\n");
-      code.append("move $ra $t0\n");
+      code.append("move $ra ").append(raReg).append("\n");
+      regAllocator.clear(raReg);
+      
+      // Look up the function's return type
+      SymbolInfo funcInfo = symbolTable.find(id);
+      VarType returnType = (funcInfo != null) ? funcInfo.getType() : null;
       
       // Handle the return value if the function returns a value
       if (returnType != null && returnType != VarType.VOID) {
-        // Calculate the offset for return value
-        // For identity(7), it's -12
-        // For add(3, 4), it's -16
+        // Calculate the offset for return value based on number of parameters
         int returnOffset = -8 - (4 * args.size());
         
         // Get a temporary register to hold the return value
@@ -164,7 +225,7 @@ public class Call extends AbstractNode implements Expression {
         code.append("# Get return value off stack\n");
         code.append("lw ").append(returnReg).append(" ").append(returnOffset).append("($sp)\n");
         
-        // Return a register result with the return type
+        // Return a register result with the correct return type
         return MIPSResult.createRegisterResult(returnReg, returnType);
       }
       
