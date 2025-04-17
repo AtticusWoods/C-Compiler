@@ -63,7 +63,12 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
 
     // Add parameters with offsets first
     for (int i = 0; i < params.size(); i++) {
-      functionTable.addParameter(params.get(i).getId(), params.get(i).getType(), -(i + 1));
+      functionTable.addParameter(params.get(i).getId(), params.get(i).getType(), i + 1);
+    }
+
+    // Add return slot if function isn't void
+    if (returnType != null) {
+      functionTable.addSymbol("return", new SymbolInfo("return", returnType, false, (params.size() + 1) * -4)); // Will get next available negative offset
     }
 
     // Process the function body to collect variable declarations

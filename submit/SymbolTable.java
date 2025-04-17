@@ -38,7 +38,7 @@ public class SymbolTable {
     // Add println() as a built-in function
     addSymbol("println", new SymbolInfo("println", VarType.VOID, true));
     // Add return symbol
-    addSymbol("return", new SymbolInfo("return", null, true));
+//    addSymbol("return", new SymbolInfo("return", null, true));
   }
 
 
@@ -191,7 +191,7 @@ public class SymbolTable {
   // Add this method to handle function parameters specifically
   public void addParameter(String id, VarType type, int paramPosition) {
     // Calculate offset for parameters
-    int offset = 4 * paramPosition;
+    int offset = -4 * paramPosition;
     table.put(id, new SymbolInfo(id, type, false, offset));
   }
 

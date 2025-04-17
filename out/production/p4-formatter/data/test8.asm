@@ -12,25 +12,25 @@ add:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x (offset: 4)
-#  y (offset: 8)
-#  return
+#  x (offset: -4)
+#  y (offset: -8)
+#  return (offset: -12)
 # Update the stack pointer.
 addi $sp $sp -0
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 4
+li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of x.
 lw $t1 0($t0)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t0 8
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of y.
 lw $t2 0($t0)
 add $t1 $t1 $t2
-sw $t1, 0($sp)
+sw $t1 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -41,9 +41,9 @@ add2:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x (offset: 4)
-#  y (offset: 8)
-#  return
+#  x (offset: -4)
+#  y (offset: -8)
+#  return (offset: -12)
 # Update the stack pointer.
 addi $sp $sp -0
 # Calling function add
@@ -60,14 +60,14 @@ sw $t1 -4($sp)
 sw $t0 -8($sp)
 # Evaluate parameters and save to stack
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t2 4
+li $t2 -4
 # Add the stack pointer address to the offset.
 add $t2 $t2 $sp
 # Load the value of x.
 lw $t3 0($t2)
 sw $t3 -8($sp)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t3 8
+li $t3 -8
 # Add the stack pointer address to the offset.
 add $t3 $t3 $sp
 # Load the value of y.
@@ -101,7 +101,7 @@ lw $t0 -4($sp)
 move $ra $t0
 # Get return value off stack
 lw $t0 -16($sp)
-sw $t0, 0($sp)
+sw $t0 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -112,7 +112,6 @@ main:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # println
