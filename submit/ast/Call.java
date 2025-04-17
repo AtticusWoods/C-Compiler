@@ -225,13 +225,13 @@ public class Call extends AbstractNode implements Expression {
       // Now look for the function in the root table
       funcInfo = currentTable.find(id);
       
-      // Debug output to help diagnose issues
-      code.append("# Looking for function: ").append(id).append("\n");
-      if (funcInfo == null) {
-          code.append("# WARNING: Function ").append(id).append(" not found in symbol table\n");
-      } else {
-          code.append("# Found function ").append(id).append(" with return type ").append(funcInfo.getType()).append("\n");
-      }
+//      // Debug output to help diagnose issues
+//      code.append("# Looking for function: ").append(id).append("\n");
+//      if (funcInfo == null) {
+//          code.append("# WARNING: Function ").append(id).append(" not found in symbol table\n");
+//      } else {
+//          code.append("# Found function ").append(id).append(" with return type ").append(funcInfo.getType()).append("\n");
+//      }
       
       VarType returnType = (funcInfo != null) ? funcInfo.getType() : null;
       

@@ -186,9 +186,14 @@ public class SymbolTable {
   }
 
   public Set<String> getSymbols() {
-    Set<String> symbols = new HashSet<>(table.keySet());
-    // Remove the current function name if present
-    symbols.remove(currentFunctionName);
+    Set<String> symbols = new HashSet<>();
+    for (String symbol : table.keySet()) {
+      SymbolInfo info = table.get(symbol);
+      // Only include non-function symbols and println
+      if (!info.isFunction() || symbol.equals("println")) {
+        symbols.add(symbol);
+      }
+    }
     return symbols;
   }
 

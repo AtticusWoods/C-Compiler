@@ -14,6 +14,8 @@ add:
 #  println
 #  x
 #  y
+#  main
+#  add2
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -41,9 +43,11 @@ jr $ra
 add2:
 # Entering a new scope.
 # Symbols in symbol table:
+#  add
 #  println
 #  x
 #  y
+#  main
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -85,12 +89,12 @@ lw $t0 -8($sp)
 lw $t1 -4($sp)
 # Restore $ra
 move $ra $t1
-# Looking for function: add
-# WARNING: Function add not found in symbol table
-move $t1, $v0
-sw $t1 -16($sp)
-li $t1 1
-sw $t1 -20($sp)
+# Get return value off stack
+lw $t1 -16($sp)
+move $t2, $v0
+sw $t2 -16($sp)
+li $t2 1
+sw $t2 -20($sp)
 # Update the stack pointer
 add $sp $sp -16
 # Call the function
@@ -98,11 +102,14 @@ jal add
 # Restore the stack pointer
 add $sp $sp 16
 # Restore $t0-9 registers
+lw $t1 -8($sp)
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-# Looking for function: add
-# WARNING: Function add not found in symbol table
+# Get return value off stack
+lw $t0 -16($sp)
+sw $t0, 0($sp)
+move $v0, $t0
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -112,7 +119,11 @@ jr $ra
 main:
 # Entering a new scope.
 # Symbols in symbol table:
+#  add
 #  println
+#  x
+#  y
+#  add2
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -129,25 +140,27 @@ syscall
 move $t0 $ra
 # Save $t0-9 registers
 sw $t0 -4($sp)
+sw $t1 -8($sp)
 # Evaluate parameters and save to stack
-li $t1 2
-sw $t1 -16($sp)
-li $t1 4
-sw $t1 -20($sp)
+li $t2 2
+sw $t2 -20($sp)
+li $t2 4
+sw $t2 -24($sp)
 # Update the stack pointer
-add $sp $sp -16
+add $sp $sp -20
 # Call the function
 jal add2
 # Restore the stack pointer
-add $sp $sp 16
+add $sp $sp 20
 # Restore $t0-9 registers
+lw $t1 -8($sp)
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-# Looking for function: add2
-# WARNING: Function add2 not found in symbol table
-move $a0, $v0
-li $v0, 1
+# Get return value off stack
+lw $t0 -16($sp)
+move $a0 $t0
+li $v0 1
 syscall
 la $a0 newline
 li $v0 4

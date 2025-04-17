@@ -14,8 +14,6 @@ add:
 #  println
 #  x
 #  y
-#  main
-#  add2
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -43,11 +41,9 @@ jr $ra
 add2:
 # Entering a new scope.
 # Symbols in symbol table:
-#  add
 #  println
 #  x
 #  y
-#  main
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -89,8 +85,6 @@ lw $t0 -8($sp)
 lw $t1 -4($sp)
 # Restore $ra
 move $ra $t1
-# Looking for function: add
-# Found function add with return type int
 # Get return value off stack
 lw $t1 -16($sp)
 move $t2, $v0
@@ -108,8 +102,6 @@ lw $t1 -8($sp)
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-# Looking for function: add
-# Found function add with return type int
 # Get return value off stack
 lw $t0 -16($sp)
 sw $t0, 0($sp)
@@ -123,11 +115,9 @@ jr $ra
 main:
 # Entering a new scope.
 # Symbols in symbol table:
-#  add
 #  println
 #  x
 #  y
-#  add2
 #  return
 # Update the stack pointer.
 addi $sp $sp -0
@@ -161,8 +151,6 @@ lw $t1 -8($sp)
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-# Looking for function: add2
-# Found function add2 with return type int
 # Get return value off stack
 lw $t0 -16($sp)
 move $a0 $t0
