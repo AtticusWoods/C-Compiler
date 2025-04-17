@@ -161,7 +161,7 @@ public class Call extends AbstractNode implements Expression {
                 code.append("lw ").append(valueReg).append(" 0(").append(addrReg).append(")\n");
                 
                 code.append("sw ").append(valueReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
-                regAllocator.clear(addrReg);
+//                regAllocator.clear(addrReg);
                 regAllocator.clear(valueReg);
             }
         }
@@ -182,9 +182,8 @@ public class Call extends AbstractNode implements Expression {
       }
       
       // Update stack pointer before call
-      int totalSaveSize = saveSize + 4 * usedTRegs;
       code.append("# Update the stack pointer\n");
-      code.append("add $sp $sp -").append(saveSize).append("\n");
+      code.append("add $sp $sp -").append(4 + args.size() * 4).append("\n");
       
       // Make the call
       code.append("# Call the function\n");
@@ -192,7 +191,7 @@ public class Call extends AbstractNode implements Expression {
       
       // Restore stack pointer after call
       code.append("# Restore the stack pointer\n");
-      code.append("add $sp $sp ").append(saveSize).append("\n");
+      code.append("add $sp $sp ").append(4 + args.size() * 4).append("\n");
       
       // Restore all saved registers
       code.append("# Restore $t0-9 registers\n");

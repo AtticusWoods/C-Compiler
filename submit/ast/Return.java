@@ -37,38 +37,34 @@ public class Return extends AbstractNode implements Statement {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
 //    code.append("# Return statement\n");
-    
+
     // If there's an expression to return
     if (expr != null) {
       // Evaluate the return expression
       MIPSResult result = expr.toMIPS(code, data, symbolTable, regAllocator);
-      
+
       // Get the symbol info for the special "return" variable
       SymbolInfo returnSymbol = symbolTable.find("return");
-      
+
       if (returnSymbol != null) {
         // Store the result in the "return" location on the stack
         if (result.getRegister() != null) {
           // If return value is in a register
           String offset = Integer.toString(returnSymbol.getOffset());
-          code.append("sw ").append(result.getRegister()).append(", ").append(offset).append("($sp)\n");
-          
-//          // Load the return value into $v0 (standard return value register)
-//          code.append("move $v0, ").append(result.getRegister()).append("\n");
-          
+          code.append("sw ").append(result.getRegister()).append(" ").append(offset).append("($sp)\n");
           // Free the register
           regAllocator.clear(result.getRegister());
         } else if (result.getAddress() != null) {
           // If return value is an address (like a string)
           String tempReg = regAllocator.getT();
           code.append("la ").append(tempReg).append(", ").append(result.getAddress()).append("\n");
-          
+
           String offset = Integer.toString(returnSymbol.getOffset());
           code.append("sw ").append(tempReg).append(", ").append(offset).append("($sp)\n");
-          
+
           // Load the return value into $v0 (standard return value register)
           code.append("move $v0, ").append(tempReg).append("\n");
-          
+
           // Free the register
           regAllocator.clear(tempReg);
         }
@@ -77,10 +73,10 @@ public class Return extends AbstractNode implements Statement {
       // Void return - nothing to do but generate the jr $ra instruction
       code.append("# Void return\n");
     }
-    
+
     // Return to caller
     code.append("jr $ra\n");
-    
+
     return MIPSResult.createVoidResult();
   }
 

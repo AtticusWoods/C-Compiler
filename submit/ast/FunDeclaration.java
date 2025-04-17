@@ -58,33 +58,36 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     // Function prologue
     code.append("\n# code for ").append(id).append("\n");
     code.append(id).append(":\n");
-
     // For all functions (including main), add scope entry
     code.append("# Entering a new scope.\n");
 
-    // Reset the offset counter for this function
-    functionTable.resetOffset();
+    // Add parameters with offsets first
+    for (int i = 0; i < params.size(); i++) {
+      functionTable.addParameter(params.get(i).getId(), params.get(i).getType(), -(i + 1));
+    }
 
     // Process the function body to collect variable declarations
-    // We need to find all variables before printing the symbol table
     extractVariableDeclarations(statement, functionTable);
 
-    // Add function parameters to the symbol table with correct offsets
-    for (int i = 0; i < params.size(); i++) {
-      Param param = params.get(i);
-      // Use the new addParameter method with position (1-indexed)
-      functionTable.addParameter(param.getId(), param.getType(), i + 1);
-    }
+
 
     code.append("# Symbols in symbol table:\n");
-    
-    // Print all symbols in this function's scope
-    for (String symbol : functionTable.getSymbols()) {
-      code.append("#  ").append(symbol).append("\n");
-    }
 
-    code.append("# Update the stack pointer.\n");
-    code.append("addi $sp $sp -0\n");
+    // Print all symbols in this function's scope
+    code.append(functionTable.getSymbolsWithOffsets());
+
+//    for (String symbol : functionTable.getSymbols()) {
+//      code.append("#  ").append(symbol).append("\n");
+//    }
+
+    // Calculate total stack space needed (4 bytes per local variable)
+    int stackSpace = functionTable.getActivationRecordSize();
+
+    // Allocate stack space for local variables
+    if (stackSpace >= 0) {
+      code.append("# Update the stack pointer.\n");
+      code.append("addi $sp $sp -").append(stackSpace).append("\n");
+    }
 
     // Special handling for main function
     if (id.equals("main")) {
