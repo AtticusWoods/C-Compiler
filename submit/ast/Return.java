@@ -53,8 +53,8 @@ public class Return extends AbstractNode implements Statement {
           String offset = Integer.toString(returnSymbol.getOffset());
           code.append("sw ").append(result.getRegister()).append(", ").append(offset).append("($sp)\n");
           
-          // Load the return value into $v0 (standard return value register)
-          code.append("move $v0, ").append(result.getRegister()).append("\n");
+//          // Load the return value into $v0 (standard return value register)
+//          code.append("move $v0, ").append(result.getRegister()).append("\n");
           
           // Free the register
           regAllocator.clear(result.getRegister());

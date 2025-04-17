@@ -52,7 +52,7 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
                            SymbolTable symbolTable, RegisterAllocator regAllocator) {
     // Create a new symbol table for this function's scope
-    SymbolTable functionTable = new SymbolTable();
+    SymbolTable functionTable = symbolTable.createChild();
     functionTable.setCurrentFunction(id);
 
     // Function prologue
