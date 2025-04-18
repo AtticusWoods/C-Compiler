@@ -54,8 +54,9 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
                            StringBuilder data,
                            SymbolTable symbolTable,
                            RegisterAllocator regAllocator) {
+    code.append("\n");
     if ("main".equals(id)) {
-      code.append("\n# code for main\n");
+          code.append("# code for main\n");
       code.append("main:\n");
       
       // Enter a new scope for the function
@@ -105,8 +106,54 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       return MIPSResult.createVoidResult();
     } else {
-      // Non-main function handling (similar logic)
-      // ...
+      // Non-main function implementation
+      code.append("# code for ").append(id).append("\n");
+      code.append(id).append(":\n");
+      
+      // Enter a new scope for the function
+      code.append("# Entering a new scope.\n");
+      code.append("# Symbols in symbol table:\n");
+      
+      // Get the symbols from the compound statement if available
+      if (statement instanceof CompoundStatement) {
+        CompoundStatement compStmt = (CompoundStatement) statement;
+        Set<String> symbols = compStmt.getSymbolNames();
+        for (String symbol : symbols) {
+          code.append("#  ").append(symbol).append("\n");
+        }
+      } else {
+        // Default symbols
+        code.append("#  println\n");
+        code.append("#  return\n");
+      }
+      
+      // Calculate the stack space needed for local variables
+      int frameSize = 0;
+      if (statement instanceof CompoundStatement) {
+        CompoundStatement compStmt = (CompoundStatement) statement;
+        // Look for var declarations to calculate total stack space needed
+        for (Statement stmt : compStmt.getStatements()) {
+          if (stmt instanceof VarDeclaration) {
+            VarDeclaration varDecl = (VarDeclaration) stmt;
+            frameSize += varDecl.getTotalSize();
+          }
+        }
+      }
+      
+      // Update stack pointer (for local variables)
+      code.append("# Update the stack pointer.\n");
+      code.append("addi $sp $sp -").append(frameSize).append("\n");
+      
+      // Generate the body of the function
+      statement.toMIPS(code, data, symbolTable, regAllocator);
+      
+      // Exit the scope when done
+      code.append("# Exiting scope.\n");
+      code.append("addi $sp $sp ").append(frameSize).append("\n");
+      
+      // Return from function
+      code.append("jr $ra\n");
+      
       return MIPSResult.createVoidResult();
     }
   }

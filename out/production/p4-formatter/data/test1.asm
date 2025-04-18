@@ -31,5 +31,5 @@ syscall
 # .data assembler directive
 .data
 
-label_0:	.asciiz	"Hello world"
 newline:	.asciiz	"\n"
+label_0:	.asciiz	"Hello world"
