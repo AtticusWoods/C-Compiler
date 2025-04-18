@@ -6,6 +6,7 @@
 .globl	main
 
 j main
+
 # code for main
 main:
 # Entering a new scope.

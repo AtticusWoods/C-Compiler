@@ -44,11 +44,19 @@ public class Call extends AbstractNode implements Expression {
                            RegisterAllocator regAllocator) {
     // Handle special case for println function
     if (id.equals("println")) {
+      // Ensure we have a newline defined in the data section
+      // Do this at the beginning to ensure it's always defined
+      if (!data.toString().contains("newline:")) {
+        data.append("newline:\t.asciiz\t\"\\n\"\n");
+      }
+      
       if (args.size() == 1) {
+
+        code.append("# println\n");
         Expression arg = args.get(0);
         MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
         
-        code.append("# println\n");
+
         
         // Handle different types of arguments
         if (result.getType() == VarType.CHAR && result.getAddress() != null) {
@@ -70,22 +78,12 @@ public class Call extends AbstractNode implements Expression {
         code.append("la $a0 newline\n");
         code.append("li $v0 4\n");
         code.append("syscall\n");
-        
-        // Ensure we have a newline defined in the data section
-        if (!data.toString().contains("newline")) {
-          data.append("newline:	.asciiz	\"\\n\"\n");
-        }
       } else {
         // Handle println with no arguments - just print a newline
         code.append("# println\n");
         code.append("la $a0 newline\n");
         code.append("li $v0 4\n");
         code.append("syscall\n");
-        
-        // Ensure we have a newline defined in the data section
-        if (!data.toString().contains("newline")) {
-          data.append("newline:	.asciiz	\"\\n\"\n");
-        }
       }
       
       return MIPSResult.createVoidResult();

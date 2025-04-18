@@ -4,6 +4,10 @@
  */
 package submit.ast;
 
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
+
 /**
  *
  * @author edwajohn
@@ -20,4 +24,18 @@ public class NumConstant extends AbstractNode implements Expression, Node {
     builder.append(Integer.toString(value));
   }
 
+  @Override
+  public MIPSResult toMIPS(StringBuilder code,
+                         StringBuilder data,
+                         SymbolTable symbolTable,
+                         RegisterAllocator regAllocator) {
+    // Get an available register
+    String register = regAllocator.getT();
+    
+    // Load the immediate value into the register
+    code.append("li ").append(register).append(" ").append(value).append("\n");
+    
+    // Return the register with the value
+    return MIPSResult.createRegisterResult(register, VarType.INT);
+  }
 }
