@@ -52,33 +52,22 @@ public class Mutable extends AbstractNode implements Expression, Node {
       // Get the offset of the variable
       int offset = symbolInfo.getOffset();
       
-      // Get a register for the address calculation
+      // For parameters and local variables, use teacher's approach:
+      // Use negative offsets from stack pointer
       String addrRegister = regAllocator.getT();
+      String resultRegister = regAllocator.getT();
       
-      // Comment for clarity
       code.append("# Get ").append(id).append("'s offset from $sp from the symbol table and initialize ").append(id).append("'s address with it. We'll add $sp later.\n");
-      
-      // Calculate the address of the variable
       code.append("li ").append(addrRegister).append(" ").append(offset).append("\n");
       code.append("# Add the stack pointer address to the offset.\n");
       code.append("add ").append(addrRegister).append(" ").append(addrRegister).append(" $sp\n");
+      code.append("# Load the value of ").append(id).append(".\n");
+      code.append("lw ").append(resultRegister).append(" 0(").append(addrRegister).append(")\n");
       
-      // Get a register for the result
-      String resultRegister = regAllocator.getT();
+      // Free the address register
+      regAllocator.clear(addrRegister);
       
-      if (index == null) {
-        // Simple variable access
-        code.append("# Load the value of ").append(id).append(".\n");
-        code.append("lw ").append(resultRegister).append(" 0(").append(addrRegister).append(")\n");
-        
-        // Free the address register
-        regAllocator.clear(addrRegister);
-        
-        return MIPSResult.createRegisterResult(resultRegister, symbolInfo.getType());
-      } else {
-        // Array access - would need to be implemented for arrays
-        return MIPSResult.createVoidResult();
-      }
+      return MIPSResult.createRegisterResult(resultRegister, symbolInfo.getType());
     }
     
     // If variable not found in symbol table

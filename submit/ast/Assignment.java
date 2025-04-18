@@ -62,13 +62,21 @@ public class Assignment extends AbstractNode implements Expression {
       // Evaluate the right-hand side of the assignment
       code.append("# Compute rhs for assignment ").append(type).append("\n");
       MIPSResult rhsResult = rhs.toMIPS(code, data, symbolTable, regAllocator);
-      String rhsRegister = rhsResult.getRegister();
       
       // Store the result in memory
       code.append("# complete assignment statement with store\n");
       if (mutable.getIndex() == null) {
         // Simple variable assignment
-        code.append("sw ").append(rhsRegister).append(" 0(").append(addrRegister).append(")\n");
+        if (rhsResult.getRegister() != null) {
+          code.append("sw ").append(rhsResult.getRegister()).append(" 0(").append(addrRegister).append(")\n");
+          regAllocator.clear(rhsResult.getRegister());
+        } else if (rhsResult.getType() == VarType.INT) {
+          // Handle direct integer value
+          String tempReg = regAllocator.getT();
+          code.append("li ").append(tempReg).append(" ").append(rhsResult.getIntValue()).append("\n");
+          code.append("sw ").append(tempReg).append(" 0(").append(addrRegister).append(")\n");
+          regAllocator.clear(tempReg);
+        }
       } else {
         // Array assignment - would need to be implemented for arrays
       }

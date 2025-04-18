@@ -20,23 +20,34 @@ public class MIPSResult {
   private final String register;
   private final String address;
   private final VarType type;
+  private final int intValue; // Added to store immediate integer values
 
   public static MIPSResult createVoidResult() {
-    return new MIPSResult(null, null, null);
+    return new MIPSResult(null, null, null, 0);
   }
 
   public static MIPSResult createRegisterResult(String register, VarType type) {
-    return new MIPSResult(register, null, type);
+    return new MIPSResult(register, null, type, 0);
   }
 
   public static MIPSResult createAddressResult(String address, VarType type) {
-    return new MIPSResult(null, address, type);
+    return new MIPSResult(null, address, type, 0);
+  }
+  
+  public static MIPSResult createIntResult(int value) {
+    return new MIPSResult(null, null, VarType.INT, value);
   }
 
-  private MIPSResult(String register, String address, VarType type) {
+  public MIPSResult(String register, String address, VarType type, int intValue) {
     this.register = register;
     this.address = address;
     this.type = type;
+    this.intValue = intValue;
+  }
+  
+  // For backward compatibility
+  public MIPSResult(String register, String address, VarType type) {
+    this(register, address, type, 0);
   }
 
   /**
@@ -57,5 +68,8 @@ public class MIPSResult {
   public VarType getType() {
     return type;
   }
-
+  
+  public int getIntValue() {
+    return intValue;
+  }
 }

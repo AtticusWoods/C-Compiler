@@ -35,7 +35,7 @@ public class NumConstant extends AbstractNode implements Expression, Node {
     // Load the immediate value into the register
     code.append("li ").append(register).append(" ").append(value).append("\n");
     
-    // Return the register with the value
-    return MIPSResult.createRegisterResult(register, VarType.INT);
+    // Return both the register and the integer value
+    return new MIPSResult(register, null, VarType.INT, value);
   }
 }

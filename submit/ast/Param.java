@@ -12,12 +12,12 @@ public class Param extends AbstractNode implements Node {
 
   private final VarType type;
   private final String id;
-  private final boolean array;
+  private final boolean isArray;
 
-  public Param(VarType type, String id, boolean array) {
+  public Param(VarType type, String id, boolean isArray) {
     this.type = type;
     this.id = id;
-    this.array = array;
+    this.isArray = isArray;
   }
 
   public VarType getType() {
@@ -29,15 +29,14 @@ public class Param extends AbstractNode implements Node {
   }
 
   public boolean isArray() {
-    return array;
+    return isArray;
   }
 
-  public void toCminus(StringBuilder builder, final String prefix) {
-    if (isArray()) {
-      builder.append(type).append(" ").append(id).append("[]");
-    } else {
-      builder.append(type).append(" ").append(id);
+  @Override
+  public void toCminus(StringBuilder builder, String prefix) {
+    builder.append(type).append(" ").append(id);
+    if (isArray) {
+      builder.append("[]");
     }
   }
-
 }

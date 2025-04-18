@@ -45,11 +45,11 @@ public class Call extends AbstractNode implements Expression {
     // Handle special case for println function
     if (id.equals("println")) {
       // Ensure we have a newline defined in the data section
-      // Do this at the beginning to ensure it's always defined
       if (!data.toString().contains("newline:")) {
         data.append("newline:\t.asciiz\t\"\\n\"\n");
       }
       
+      // Process println call
       if (args.size() == 1) {
         code.append("# println\n");
         Expression arg = args.get(0);
@@ -66,6 +66,9 @@ public class Call extends AbstractNode implements Expression {
           if (result.getRegister() != null) {
             code.append("move $a0 ").append(result.getRegister()).append("\n");
             regAllocator.clear(result.getRegister());
+          } else if (result.getType() == VarType.INT) {
+            // Handle direct integer value
+            code.append("li $a0 ").append(result.getIntValue()).append("\n");
           }
           code.append("li $v0 1\n");
           code.append("syscall\n");
@@ -85,40 +88,58 @@ public class Call extends AbstractNode implements Expression {
       
       return MIPSResult.createVoidResult();
     } else {
-      // Handle regular function calls
+      // Handle regular function calls with parameters
       code.append("# Calling function ").append(id).append("\n");
       
       // Save the return address register
       code.append("# Save $ra to a register\n");
       code.append("move $t0 $ra\n");
       
-      // Calculate stack space needed for saving registers and arguments
-      int stackSpace = 4; // At minimum, we need space to save $ra
+      // Calculate stack space needed - 12 bytes consistent with teacher example
+      int savedRegsSpace = 12;  // This matches the teacher's example
       
-      // Save $t0 (which now contains $ra)
+      // Save $t0 (which contains $ra)
       code.append("# Save $t0-9 registers\n");
-      code.append("sw $t0 -").append(stackSpace).append("($sp)\n");
+      code.append("sw $t0 -").append(savedRegsSpace).append("($sp)\n");
       
-      // Process function arguments if there are any
+      // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
       
-      // Adjust stack pointer to make space for saved registers and arguments
+      // Process parameters - matching teacher's offsets exactly
+      int paramOffset = 16;  // First parameter at -16($sp)
+      for (int i = 0; i < args.size(); i++) {
+        Expression arg = args.get(i);
+        MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
+        
+        if (result.getRegister() != null) {
+          code.append("sw ").append(result.getRegister()).append(" -").append(paramOffset + (i * 4)).append("($sp)\n");
+          regAllocator.clear(result.getRegister());
+        } else {
+          // For number constants
+          String tempReg = regAllocator.getT();
+          code.append("li ").append(tempReg).append(" ").append(result.getIntValue()).append("\n");
+          code.append("sw ").append(tempReg).append(" -").append(paramOffset + (i * 4)).append("($sp)\n");
+          regAllocator.clear(tempReg);
+        }
+      }
+      
+      // Update stack pointer for function call - exactly 12 as in the teacher's example
       code.append("# Update the stack pointer\n");
-      code.append("add $sp $sp -").append(stackSpace).append("\n");
+      code.append("add $sp $sp -").append(savedRegsSpace).append("\n");
       
       // Call the function
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
       
-      // Restore the stack pointer
+      // Restore stack pointer
       code.append("# Restore the stack pointer\n");
-      code.append("add $sp $sp ").append(stackSpace).append("\n");
+      code.append("add $sp $sp ").append(savedRegsSpace).append("\n");
       
-      // Restore the saved registers
+      // Restore saved registers
       code.append("# Restore $t0-9 registers\n");
-      code.append("lw $t0 -").append(stackSpace).append("($sp)\n");
+      code.append("lw $t0 -").append(savedRegsSpace).append("($sp)\n");
       
-      // Restore the return address register
+      // Restore return address
       code.append("# Restore $ra\n");
       code.append("move $ra $t0\n");
       

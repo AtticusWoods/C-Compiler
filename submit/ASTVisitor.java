@@ -60,12 +60,41 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
             returnType = getVarType(ctx.typeSpecifier());
         }
         String id = ctx.ID().getText();
-        List<Param> params = new ArrayList<>();
-        for (CminusParser.ParamContext p : ctx.param()) {
-            params.add((Param) visitParam(p));
-        }
-        Statement statement = (Statement) visitStatement(ctx.statement());
+        
+        // Add function to the global symbol table
         symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
+        
+        // Create a new scope for the function body
+        SymbolTable parentTable = symbolTable;
+        symbolTable = symbolTable.createChild();
+        
+        // Process parameters and add them to the function's symbol table
+        List<Param> params = new ArrayList<>();
+        
+        // For function parameters, calculate offsets using negative values
+        // This exactly matches the teacher's example where parameters are
+        // accessed at -4, -8, etc. from the stack pointer
+        int paramOffset = -4; // First parameter at -4($sp), second at -8($sp), etc.
+        
+        for (CminusParser.ParamContext p : ctx.param()) {
+            Param param = (Param) visitParam(p);
+            params.add(param);
+            
+            // Add parameter to symbol table with offset matching teacher's example
+            SymbolInfo paramInfo = new SymbolInfo(param.getId(), param.getType(), false);
+            paramInfo.setOffset(paramOffset);
+            symbolTable.addSymbol(param.getId(), paramInfo);
+            
+            // Update offset for next parameter
+            paramOffset -= 4; // Each parameter takes 4 bytes
+        }
+        
+        // Visit function body with parameters in scope
+        Statement statement = (Statement) visitStatement(ctx.statement());
+        
+        // Restore parent symbol table
+        symbolTable = parentTable;
+        
         return new FunDeclaration(returnType, id, params, statement);
     }
 
