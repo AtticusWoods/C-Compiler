@@ -22,47 +22,46 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-# println
 li $t0 7
+# println
 move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
-# println
 li $t0 3
 li $t1 4
 add $t0 $t0 $t1
+# println
 move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
-# println
 li $t0 14
 li $t1 2
 div $t0 $t1
 mflo $t0
+# println
 move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
-# println
 li $t0 7
 li $t1 1
 mult $t0 $t1
 mflo $t0
+# println
 move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
-# println
 li $t0 7
 li $t1 2
 mult $t0 $t1
@@ -70,6 +69,7 @@ mflo $t0
 li $t1 2
 div $t0 $t1
 mflo $t0
+# println
 move $a0 $t0
 li $v0 1
 syscall
@@ -85,4 +85,5 @@ syscall
 # .data assembler directive
 .data
 
+newline:	.asciiz	"\n"
 label_0:	.asciiz	"This program prints 7 7 7 7 7 (separated by newlines)"
