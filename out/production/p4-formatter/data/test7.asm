@@ -12,18 +12,17 @@ identity:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x
-#  return
+#  x (offset: -4)
+#  return (offset: -8)
 # Update the stack pointer.
-addi $sp $sp -0
+addi $sp $sp -8
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Load the value of x.
 lw $t1 0($t0)
-sw $t1, 0($sp)
-move $v0, $t1
+sw $t1 -8($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -34,11 +33,11 @@ add:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x
-#  y
-#  return
+#  x (offset: -4)
+#  y (offset: -8)
+#  return (offset: -12)
 # Update the stack pointer.
-addi $sp $sp -0
+addi $sp $sp -12
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -52,8 +51,7 @@ add $t0 $t0 $sp
 # Load the value of y.
 lw $t2 0($t0)
 add $t1 $t1 $t2
-sw $t1, 0($sp)
-move $v0, $t1
+sw $t1 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -64,7 +62,6 @@ main:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # println
@@ -84,17 +81,19 @@ sw $t0 -4($sp)
 li $t1 7
 sw $t1 -8($sp)
 # Update the stack pointer
-add $sp $sp -4
+add $sp $sp -12
 # Call the function
 jal identity
 # Restore the stack pointer
-add $sp $sp 4
+add $sp $sp 12
 # Restore $t0-9 registers
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
-li $v0, 1
+# Get return value off stack
+lw $t0 -12($sp)
+move $a0 $t0
+li $v0 1
 syscall
 la $a0 newline
 li $v0 4
@@ -111,17 +110,19 @@ sw $t1 -8($sp)
 li $t1 4
 sw $t1 -12($sp)
 # Update the stack pointer
-add $sp $sp -4
+add $sp $sp -16
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 4
+add $sp $sp 16
 # Restore $t0-9 registers
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
-move $a0, $v0
-li $v0, 1
+# Get return value off stack
+lw $t0 -16($sp)
+move $a0 $t0
+li $v0 1
 syscall
 la $a0 newline
 li $v0 4

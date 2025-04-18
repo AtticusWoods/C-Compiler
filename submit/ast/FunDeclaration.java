@@ -81,16 +81,15 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
     // Print all symbols in this function's scope
     code.append(functionTable.getSymbolsWithOffsets());
 
-//    for (String symbol : functionTable.getSymbols()) {
-//      code.append("#  ").append(symbol).append("\n");
-//    }
-
     // Calculate total stack space needed (4 bytes per local variable)
-    int stackSpace = functionTable.getActivationRecordSize();
+    int stackSpace = functionTable.getCurrentScopeSize();
 
     // Allocate stack space for local variables
-    if (stackSpace >= 0) {
-      code.append("# Update the stack pointer.\n");
+
+    code.append("# Update the stack pointer.\n");
+    if ( stackSpace > 0 ) {
+      code.append("addi $sp $sp -0").append("\n");
+    } else {
       code.append("addi $sp $sp -").append(stackSpace).append("\n");
     }
 

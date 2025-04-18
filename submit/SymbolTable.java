@@ -25,7 +25,7 @@ public class SymbolTable {
   private final Set<Integer> usedSRegisters;
   private int activationRecordSize;
   private String currentFunctionName;
-  private int currentOffset = 0;
+
 
   public SymbolTable() {
     table = new HashMap<>();
@@ -198,7 +198,7 @@ public class SymbolTable {
   // Modify the addVariable method to only be used for local variables
   public void addVariable(String id, VarType type) {
     // Local variables are at negative offsets
-    int offset = -4 - (getCurrentScopeSize() * 4);
+    int offset = -(getCurrentScopeSize() * 4);
     table.put(id, new SymbolInfo(id, type, false, offset));
     activationRecordSize += 4;
   }
@@ -208,17 +208,17 @@ public class SymbolTable {
     if (info == null) {
       throw new RuntimeException("Variable not found: " + id);
     }
-
-    // Variable is in current scope
-    if (table.containsKey(id)) {
-      return info.getOffset();
-    }
-    // Variable is in parent scope
-    else if (parent != null) {
-      return parent.getOffset(id) + this.getCurrentScopeSize();
-    }
-
-    throw new RuntimeException("Variable not found in any scope: " + id);
+    return info.getOffset();
+//    // Variable is in current scope
+//    if (table.containsKey(id)) {
+//      return info.getOffset();
+//    }
+//    // Variable is in parent scope
+//    else if (parent != null) {
+//      return parent.getOffset(id) + this.getCurrentScopeSize();
+//    }
+//
+//    throw new RuntimeException("Variable not found in any scope: " + id);
   }
 
   public int getCurrentScopeSize() {
@@ -232,19 +232,5 @@ public class SymbolTable {
     return size;
   }
 
-  /**
-   * Resets the offset counter to 0
-   * This is needed to reset variable offsets between functions
-   */
-  public void resetOffset() {
-    currentOffset = 0;
-  }
 
-  /**
-   * Gets the current function name
-   * @return The current function name
-   */
-  public String getCurrentFunctionName() {
-    return currentFunctionName;
-  }
 }

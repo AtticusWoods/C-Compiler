@@ -90,23 +90,17 @@ public class Call extends AbstractNode implements Expression {
       code.append("move ").append(raReg).append(" $ra\n");
       
       // Calculate stack offset based on local variables in the calling function
-      int localVarsSize = symbolTable.getActivationRecordSize();
+      int localVarsSize = symbolTable.getCurrentScopeSize();
       
       // Stack offsets for saving registers and parameters
       int saveOffset = -4 - localVarsSize;     // Account for local variables
-      int saveSize = 4 + localVarsSize;        // Account for local variables
       int paramOffset = saveOffset - 4;        // Start parameters after saved registers
       int usedTRegs = regAllocator.getUsedTRegCount(); // Number of t registers currently in use
       
       code.append("# Save $t0-9 registers\n");
-      code.append("sw ").append(raReg).append(" ").append(saveOffset).append("($sp)\n");
-      
-      // Save additional t-registers if there are nested function calls
       for(int i = 0; i < usedTRegs; i++) {
           String reg = "$t" + i;
-          if(!reg.equals(raReg)) { // Don't save the same register twice
-              code.append("sw ").append(reg).append(" ").append(saveOffset - 4 * (i + 1)).append("($sp)\n");
-          }
+          code.append("sw ").append(reg).append(" ").append(saveOffset - 4 * i).append("($sp)\n");
       }
       
       // Evaluate parameters and save to stack
@@ -160,8 +154,8 @@ public class Call extends AbstractNode implements Expression {
                 code.append("# Load the value of ").append(mutable.getId()).append(".\n");
                 code.append("lw ").append(valueReg).append(" 0(").append(addrReg).append(")\n");
                 
-                code.append("sw ").append(valueReg).append(" ").append(paramOffset - (4 * i)).append("($sp)\n");
-//                regAllocator.clear(addrReg);
+                code.append("sw ").append(valueReg).append(" ").append(paramOffset - (4 * (i+1) )).append("($sp)\n");
+                regAllocator.clear(addrReg);
                 regAllocator.clear(valueReg);
             }
         }
@@ -183,7 +177,8 @@ public class Call extends AbstractNode implements Expression {
       
       // Update stack pointer before call
       code.append("# Update the stack pointer\n");
-      code.append("add $sp $sp -").append(4 + args.size() * 4).append("\n");
+      int totalSpace = 4 + (usedTRegs * 4) + (args.size() * 4);
+      code.append("add $sp $sp -").append(totalSpace).append("\n");
       
       // Make the call
       code.append("# Call the function\n");
@@ -191,18 +186,15 @@ public class Call extends AbstractNode implements Expression {
       
       // Restore stack pointer after call
       code.append("# Restore the stack pointer\n");
-      code.append("add $sp $sp ").append(4 + args.size() * 4).append("\n");
+      code.append("add $sp $sp ").append(totalSpace).append("\n");
       
       // Restore all saved registers
       code.append("# Restore $t0-9 registers\n");
-      code.append("lw ").append(raReg).append(" ").append(saveOffset).append("($sp)\n");
-      
+
       // Restore additional t-registers if they were saved
       for(int i = 0; i < usedTRegs; i++) {
           String reg = "$t" + i;
-          if(!reg.equals(raReg)) { // Don't restore the same register twice
-              code.append("lw ").append(reg).append(" ").append(saveOffset - 4 * (i + 1)).append("($sp)\n");
-          }
+          code.append("lw ").append(reg).append(" ").append(saveOffset - 4 * i).append("($sp)\n");
       }
       
       // Restore $ra
@@ -217,8 +209,8 @@ public class Call extends AbstractNode implements Expression {
       // Handle the return value if the function returns a value
       if (returnType != null && returnType != VarType.VOID) {
         // Calculate the offset for return value based on number of parameters
-        int returnOffset = -8 - (4 * args.size());
-        
+        int returnOffset = saveOffset - totalSpace +4;
+
         // Get a temporary register to hold the return value
         String returnReg = regAllocator.getT();
         code.append("# Get return value off stack\n");
