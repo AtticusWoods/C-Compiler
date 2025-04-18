@@ -4,6 +4,9 @@
  */
 package submit.ast;
 
+import submit.MIPSResult;
+import submit.RegisterAllocator;
+import submit.SymbolTable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,5 +36,63 @@ public class Call extends AbstractNode implements Expression {
     }
     builder.append(")");
   }
-
+  
+  @Override
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
+    // Handle special case for println function
+    if (id.equals("println")) {
+      if (args.size() == 1) {
+        Expression arg = args.get(0);
+        MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
+        
+        code.append("# println\n");
+        
+        // Handle different types of arguments
+        if (result.getType() == VarType.CHAR && result.getAddress() != null) {
+          // String constant
+          code.append("la $a0 ").append(result.getAddress()).append("\n");
+          code.append("li $v0 4\n");
+          code.append("syscall\n");
+        } else {
+          // Numeric value or other expression
+          if (result.getRegister() != null) {
+            code.append("move $a0 ").append(result.getRegister()).append("\n");
+            regAllocator.clear(result.getRegister());
+          }
+          code.append("li $v0 1\n");
+          code.append("syscall\n");
+        }
+        
+        // Add newline
+        code.append("la $a0 newline\n");
+        code.append("li $v0 4\n");
+        code.append("syscall\n");
+        
+        // Ensure we have a newline defined in the data section
+        if (!data.toString().contains("newline")) {
+          data.append("newline:	.asciiz	\"\\n\"\n");
+        }
+      } else {
+        // Handle println with no arguments - just print a newline
+        code.append("# println\n");
+        code.append("la $a0 newline\n");
+        code.append("li $v0 4\n");
+        code.append("syscall\n");
+        
+        // Ensure we have a newline defined in the data section
+        if (!data.toString().contains("newline")) {
+          data.append("newline:	.asciiz	\"\\n\"\n");
+        }
+      }
+      
+      return MIPSResult.createVoidResult();
+    } else {
+      // Handle other function calls
+      // This will be implemented later for other functions
+      return MIPSResult.createVoidResult();
+    }
+  }
 }
