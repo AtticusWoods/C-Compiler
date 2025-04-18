@@ -77,6 +77,7 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
     }
 
     @Override public Node visitCompoundStmt(CminusParser.CompoundStmtContext ctx) {
+        SymbolTable parentTable = symbolTable;
         symbolTable = symbolTable.createChild();
         List<Statement> statements = new ArrayList<>();
         for (CminusParser.VarDeclarationContext d : ctx.varDeclaration()) {
@@ -85,8 +86,10 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         for (CminusParser.StatementContext d : ctx.statement()) {
             statements.add((Statement) visitStatement(d));
         }
-        symbolTable = symbolTable.getParent();
-        return new CompoundStatement(statements);
+        CompoundStatement compoundStatement = new CompoundStatement(statements);
+        compoundStatement.setSymbolTable(symbolTable);  // Save the symbol table in the compound statement
+        symbolTable = parentTable;  // Restore parent symbol table
+        return compoundStatement;
     }
 
     @Override public Node visitExpressionStmt(CminusParser.ExpressionStmtContext ctx) {

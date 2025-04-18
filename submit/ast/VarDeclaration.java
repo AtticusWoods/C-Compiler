@@ -85,4 +85,26 @@ public class VarDeclaration extends AbstractNode implements Declaration {
     return MIPSResult.createVoidResult();
   }
 
+  // Get the variable identifiers declared in this declaration
+  public List<String> getIds() {
+    return new ArrayList<>(ids);
+  }
+  
+  // Get the total size in bytes of all variables in this declaration
+  public int getTotalSize() {
+    int totalSize = 0;
+    for (int i = 0; i < ids.size(); i++) {
+      int size = 4; // Default size for primitives
+      
+      // If this is an array, calculate total size
+      int arraySize = arraySizes.get(i);
+      if (arraySize > 0) {
+        size = 4 * arraySize;
+      }
+      
+      totalSize += size;
+    }
+    return totalSize;
+  }
+
 }
