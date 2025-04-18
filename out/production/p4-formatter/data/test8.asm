@@ -30,7 +30,7 @@ add $t0 $t0 $sp
 # Load the value of y.
 lw $t2 0($t0)
 add $t1 $t1 $t2
-sw $t1 -12($sp)
+move $v0 $t1
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -85,7 +85,7 @@ lw $t1 -20($sp)
 # Restore $ra
 move $ra $t1
 # Get return value off stack
-lw $t1 -32($sp)
+move $t0, $v0
 sw $t1 -20($sp)
 li $t1 1
 sw $t1 -24($sp)
@@ -100,8 +100,8 @@ lw $t0 -16($sp)
 # Restore $ra
 move $ra $t0
 # Get return value off stack
-lw $t0 -28($sp)
-sw $t0 -12($sp)
+move $t0, $v0
+move $v0 $t0
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -143,7 +143,7 @@ lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
 # Get return value off stack
-lw $t0 -16($sp)
+move $t0, $v0
 move $a0 $t0
 li $v0 1
 syscall

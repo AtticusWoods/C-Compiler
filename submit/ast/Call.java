@@ -11,6 +11,7 @@ import submit.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  *
@@ -174,20 +175,22 @@ public class Call extends AbstractNode implements Expression {
             }
         }
       }
-      
+
       // Update stack pointer before call
       code.append("# Update the stack pointer\n");
       int totalSpace = 4 + (usedTRegs * 4) + (args.size() * 4);
+
+
       code.append("add $sp $sp -").append(totalSpace).append("\n");
-      
+
       // Make the call
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
-      
+
       // Restore stack pointer after call
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(totalSpace).append("\n");
-      
+
       // Restore all saved registers
       code.append("# Restore $t0-9 registers\n");
 
@@ -209,13 +212,13 @@ public class Call extends AbstractNode implements Expression {
       // Handle the return value if the function returns a value
       if (returnType != null && returnType != VarType.VOID) {
         // Calculate the offset for return value based on number of parameters
-        int returnOffset = saveOffset - totalSpace +4;
+        int returnOffset = saveOffset - totalSpace + 4;
 
         // Get a temporary register to hold the return value
         String returnReg = regAllocator.getT();
         code.append("# Get return value off stack\n");
         code.append("lw ").append(returnReg).append(" ").append(returnOffset).append("($sp)\n");
-        
+
         // Return a register result with the correct return type
         return MIPSResult.createRegisterResult(returnReg, returnType);
       }

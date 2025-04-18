@@ -16,7 +16,7 @@ add:
 #  y (offset: -8)
 #  i (offset: -32)
 # Update the stack pointer.
-addi $sp $sp -12
+addi $sp $sp -0
 # println
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
@@ -49,7 +49,7 @@ main:
 #  println
 #  b (offset: -16)
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # println
 la $a0 datalabel0
 li $v0 4

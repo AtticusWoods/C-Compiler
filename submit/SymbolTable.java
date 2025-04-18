@@ -188,6 +188,10 @@ public class SymbolTable {
     this.currentFunctionName = name;
   }
 
+  public String getCurrentFunction() {
+    return this.currentFunctionName;
+  }
+
   // Add this method to handle function parameters specifically
   public void addParameter(String id, VarType type, int paramPosition) {
     // Calculate offset for parameters

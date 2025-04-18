@@ -12,17 +12,17 @@ identity:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x (offset: -4)
-#  return (offset: -8)
+#  x
+#  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t1 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of x.
-lw $t1 0($t0)
-sw $t1 -8($sp)
+lw $t0 0($t1)
+sw $t0 -8($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -33,25 +33,25 @@ add:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x (offset: -4)
-#  y (offset: -8)
-#  return (offset: -12)
+#  x
+#  y
+#  return
 # Update the stack pointer.
-addi $sp $sp -12
+addi $sp $sp -0
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t1 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of x.
-lw $t1 0($t0)
+lw $t0 0($t1)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t0 -8
+li $t2 -8
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of y.
-lw $t2 0($t0)
-add $t1 $t1 $t2
-sw $t1 -12($sp)
+lw $t1 0($t2)
+add $t0 $t0 $t1
+sw $t0 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -62,6 +62,7 @@ main:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
+#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # println
@@ -81,11 +82,11 @@ sw $t0 -4($sp)
 li $t1 7
 sw $t1 -8($sp)
 # Update the stack pointer
-add $sp $sp -12
+add $sp $sp -4
 # Call the function
 jal identity
 # Restore the stack pointer
-add $sp $sp 12
+add $sp $sp 4
 # Restore $t0-9 registers
 lw $t0 -4($sp)
 # Restore $ra
@@ -110,11 +111,11 @@ sw $t1 -8($sp)
 li $t1 4
 sw $t1 -12($sp)
 # Update the stack pointer
-add $sp $sp -16
+add $sp $sp -4
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 16
+add $sp $sp 4
 # Restore $t0-9 registers
 lw $t0 -4($sp)
 # Restore $ra

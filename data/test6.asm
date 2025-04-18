@@ -12,26 +12,27 @@ add:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
-#  x (offset: -4)
-#  y (offset: -8)
-#  i (offset: -32)
+#  x
+#  i
+#  y
+#  return
 # Update the stack pointer.
-addi $sp $sp -12
+addi $sp $sp -0
 # println
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
+li $t1 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of x.
-lw $t1 0($t0)
+lw $t0 0($t1)
 # Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t0 -8
+li $t2 -8
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of y.
-lw $t2 0($t0)
-add $t1 $t1 $t2
-move $a0 $t1
+lw $t1 0($t2)
+add $t0 $t0 $t1
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
@@ -45,11 +46,12 @@ jr $ra
 main:
 # Entering a new scope.
 # Symbols in symbol table:
-#  a (offset: 0)
+#  a
 #  println
-#  b (offset: -16)
+#  b
+#  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # println
 la $a0 datalabel0
 li $v0 4
@@ -68,17 +70,17 @@ sw $t1 -16($sp)
 li $t1 4
 sw $t1 -20($sp)
 # Update the stack pointer
-add $sp $sp -16
+add $sp $sp -12
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 16
+add $sp $sp 12
 # Restore $t0-9 registers
 lw $t0 -12($sp)
 # Restore $ra
 move $ra $t0
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 0
+li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Compute rhs for assignment =
@@ -86,7 +88,7 @@ li $t1 5
 # complete assignment statement with store
 sw $t1 0($t0)
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t0 -16
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $t0 $sp
 # Compute rhs for assignment =
@@ -100,25 +102,25 @@ move $t0 $ra
 sw $t0 -12($sp)
 # Evaluate parameters and save to stack
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t1 0
+li $t2 -4
 # Add the stack pointer address to the offset.
-add $t1 $t1 $sp
+add $t2 $t2 $sp
 # Load the value of a.
-lw $t2 0($t1)
-sw $t2 -20($sp)
+lw $t1 0($t2)
+sw $t1 -16($sp)
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t1 -16
+li $t2 -8
 # Add the stack pointer address to the offset.
-add $t1 $t1 $sp
+add $t2 $t2 $sp
 # Load the value of b.
-lw $t2 0($t1)
-sw $t2 -24($sp)
+lw $t1 0($t2)
+sw $t1 -20($sp)
 # Update the stack pointer
-add $sp $sp -16
+add $sp $sp -12
 # Call the function
 jal add
 # Restore the stack pointer
-add $sp $sp 16
+add $sp $sp 12
 # Restore $t0-9 registers
 lw $t0 -12($sp)
 # Restore $ra

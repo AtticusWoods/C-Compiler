@@ -55,21 +55,21 @@ li $t1 12
 sw $t1 0($t0)
 # println
 # Get b's offset from $sp from the symbol table and initialize b's address with it. We'll add $sp later.
-li $t0 -8
+li $t1 -8
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t1 $t1 $sp
 # Load the value of b.
-lw $t1 0($t0)
+lw $t0 0($t1)
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 -4
+li $t2 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of a.
-lw $t2 0($t0)
-sub $t1 $t1 $t2
-li $t0 4
-add $t1 $t1 $t0
-move $a0 $t1
+lw $t1 0($t2)
+sub $t0 $t0 $t1
+li $t1 4
+add $t0 $t0 $t1
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
