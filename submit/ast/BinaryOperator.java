@@ -37,7 +37,10 @@ public class BinaryOperator extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
 
 
     MIPSResult lhsMips = lhs.toMIPS(code, data, symbolTable, regAllocator);

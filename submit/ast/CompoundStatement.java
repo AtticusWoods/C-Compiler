@@ -39,7 +39,10 @@ public class CompoundStatement extends AbstractNode implements Statement {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
     code.append("# Entering a new scope\n");
     if (localSymbolTable == null) {
       return MIPSResult.createVoidResult();

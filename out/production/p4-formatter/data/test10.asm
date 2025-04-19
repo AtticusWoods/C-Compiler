@@ -6,7 +6,7 @@
 .globl	main
 
 j main
-#code for fib
+# Code for fib
 fib:
 # Entering a new scope
 # Symbols on the symbol table
@@ -112,7 +112,7 @@ jr $ra
 # exiting scope, restoring sp 
 addi $sp $sp 0
 jr $ra
-#code for main
+# Code for main
 main:
 # Entering a new scope
 # Symbols on the symbol table

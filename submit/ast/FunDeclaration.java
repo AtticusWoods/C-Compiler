@@ -48,8 +48,11 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    code.append(String.format("#code for %s\n", this.id));
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
+    code.append("\n# Code for ").append(this.id).append("\n");
     code.append(this.id).append(":\n");
     for (Param param : params) {
       param.toMIPS(code, data, symbolTable, regAllocator);

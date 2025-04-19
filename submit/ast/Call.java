@@ -39,8 +39,10 @@ public class Call extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data,
-                    SymbolTable symbolTable, RegisterAllocator regAllocator){
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator){
     if (id.equals("println")){
       List<MIPSResult> mipsResults = new ArrayList<>();
       code.append("# println\n");

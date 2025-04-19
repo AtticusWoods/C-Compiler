@@ -28,7 +28,10 @@ public class ExpressionStatement extends AbstractNode implements Statement {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
     MIPSResult exprMips = expression.toMIPS(code, data, symbolTable, regAllocator);
     return MIPSResult.createRegisterResult(exprMips.getRegister(), exprMips.getType());
   }
