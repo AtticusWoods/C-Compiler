@@ -23,7 +23,6 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         return (t.equals("int")) ? VarType.INT : (t.equals("bool")) ? VarType.BOOL : VarType.CHAR;
     }
 
-    // TODO: 4/18/23 this is just a getter should it be something more?
     public SymbolTable getSymbolTable(){
         return this.symbolTable;
     }

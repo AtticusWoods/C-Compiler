@@ -59,7 +59,7 @@ public class CompoundStatement extends AbstractNode implements Statement {
       s.toMIPS(code, data, localSymbolTable, regAllocator);
     }
 
-    code.append("# exiting scope, restoring sp \n");
+    code.append("# Exiting scope. \n");
     code.append("addi $sp $sp ").append(symbolTable.getActivationRecordSize()).append("\n");
 
     return MIPSResult.createVoidResult();

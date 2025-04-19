@@ -38,8 +38,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -60,33 +59,48 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# function call add
-# store ra
+# Calling function add
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -12($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 3
 sw $t1 -16($sp)
 li $t1 4
 sw $t1 -20($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -12
-# call the function
+# Call the function
 jal add
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 12
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -12($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# function call add
-# store ra
+# Get a' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0-4
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 5
+# Complete assignment statement with store
+sw $t1 0($t0)
+# Get b' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0-8
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 2
+# Complete assignment statement with store
+sw $t1 0($t0)
+# Calling function add
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -12($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 # Get a's offset from $sp from the symbol table and initialize
 li $t1 -4
 # Add the stack pointer address to the offset.
@@ -101,17 +115,17 @@ add $t1 $sp $t1
 # Load the value of b.
 lw $t1 0($t1)
 sw $t1 -20($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -12
-# call the function
+# Call the function
 jal add
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 12
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -12($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall

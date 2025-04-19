@@ -57,23 +57,23 @@ public class Call extends AbstractNode implements Expression {
       code.append("syscall\n");
       code.append("la $a0 newline\n");
       code.append("li $v0 4\n");
-      code.append("syscall\n\n");
+      code.append("syscall\n");
       if (arg.getRegister() != null){
         regAllocator.clear(arg.getRegister());
       }
     } else {
-      code.append("# function call ").append(id).append("\n");
-      code.append("# store ra\n");
+      code.append("# Calling function ").append(id).append("\n");
+      code.append("# Save $ra to a register\n");
       String raReg = regAllocator.getT();
       if (raReg == null) {
         System.err.println("no regs in calll");
       }
       code.append("move ").append(raReg).append(" $ra\n");
 
-      code.append("# store t registers\n");
+      code.append("# Save $t0-9 registers\n");
       int regOffset = regAllocator.saveT(code, symbolTable.getActivationRecordSize());
 
-      code.append("# Evaluate args and place on the stack\n");
+      code.append("# Evaluate parameters and save to stack\n");
       int offset = -4;
       for (Expression arg : args) {
         MIPSResult argMips = arg.toMIPS(code, data, symbolTable, regAllocator);
@@ -86,23 +86,23 @@ public class Call extends AbstractNode implements Expression {
       }
 
 
-      code.append("# update stack pointer\n");
+      code.append("# Update the stack pointer\n");
       code.append("addi $sp $sp ").append(-regOffset - symbolTable.getActivationRecordSize()).append("\n");
-      code.append("# call the function\n");
+      code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
 
-      code.append("# restore stack pointer\n");
+      code.append("# Restore stack pointer\n");
       code.append("addi $sp $sp ").append(regOffset + symbolTable.getActivationRecordSize()).append("\n");
 
-      code.append("# restore t regs\n");
+      code.append("# Restore $t0-9 registers\n");
       regAllocator.restoreT(code, symbolTable.getActivationRecordSize());
 
       regAllocator.clear(raReg);
-      code.append("# restore ra\n");
+      code.append("# Restore $ra\n");
       code.append("move $ra ").append(raReg).append("\n");
 
       if (symbolTable.find(id).getType() != null) {
-        code.append("# get return value off the stack\n");
+        code.append("# Get return value off the stack\n");
         int offsetOfReturn = -regOffset - symbolTable.getActivationRecordSize() + args.size() * -4 - 4;
         String returnReg = regAllocator.getT();
         code.append("lw ").append(returnReg).append(" ").append(offsetOfReturn).append("($sp)\n");
