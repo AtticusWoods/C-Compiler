@@ -29,18 +29,21 @@ public class UnaryOperator extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
+
     MIPSResult exprMips = expression.toMIPS(code, data, symbolTable, regAllocator);
     String reg = exprMips.getRegister();
     if (reg == null) {
       reg = regAllocator.getT();
     }
-    // todo: deal with not expr not return reg
-    // TODO: 4/21/23 do unary operation and load result to reg
+
     if (type == UnaryOperatorType.NEG) {
-      code.append(String.format("sub %s $zero %s\n", reg, reg));
+      code.append("sub ").append(reg).append(" $zero ").append(reg).append("\n");
     } else {
-      System.err.println("todo: impl unary operator " + type.toString());
+      System.err.println("Unexpected unary operator");
     }
     return MIPSResult.createRegisterResult(reg, exprMips.getType());
   }

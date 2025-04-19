@@ -36,35 +36,5 @@ public class Assignment extends AbstractNode implements Expression, Node {
     }
   }
 
-  @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                           StringBuilder data,
-                           SymbolTable symbolTable,
-                           RegisterAllocator regAllocator) {
 
-    SymbolInfo symbolInfo = symbolTable.find(mutable.getId());
-    int targetOffset = symbolInfo.getOffset();
-    String reg = regAllocator.getT();
-    if (reg == null) {
-      System.err.println("Assignment reg failure");
-    }
-    code.append("# Get ").append(mutable.getId()).append("' offset from the stack pointer.\n");
-    code.append("li ").append(reg).append(targetOffset).append("\n");
-
-    code.append("# Add the stack pointer address to the offset.").append(mutable.getId()).append("\n");
-    code.append(String.format("add %s $sp %s\n", reg, reg));
-
-    code.append("# compute rhs for assignment\n");
-    MIPSResult expressionMips = rhs.toMIPS(code, data, symbolTable, regAllocator); // returns reg with result of rhs
-
-    code.append("# complete assignment by storing rhs in address \n");
-    code.append("TESTIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIING");
-    code.append(String.format("sw %s 0(%s)\n\n", expressionMips.getRegister(), reg));
-
-    regAllocator.clear(expressionMips.getRegister());
-    regAllocator.clear(reg);
-
-    return MIPSResult.createVoidResult();
-//    return MIPSResult.createRegisterResult(reg, expressionMips.getType());
-  }
 }

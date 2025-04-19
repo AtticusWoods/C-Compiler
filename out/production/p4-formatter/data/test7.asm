@@ -22,7 +22,6 @@ li $t0 -4
 add $t0 $sp $t0
 # Load the value of x.
 lw $t0 0($t0)
-# store the return value on the stack
 sw $t0 -8($sp)
 jr $ra
 # exiting scope, restoring sp 
@@ -52,7 +51,6 @@ add $t1 $sp $t1
 # Load the value of y.
 lw $t1 0($t1)
 add $t0 $t0 $t1
-# store the return value on the stack
 sw $t0 -12($sp)
 jr $ra
 # exiting scope, restoring sp 
