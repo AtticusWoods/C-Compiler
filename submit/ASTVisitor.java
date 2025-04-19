@@ -92,6 +92,13 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         // Visit function body with parameters in scope
         Statement statement = (Statement) visitStatement(ctx.statement());
         
+        // Add special return symbol to the compound statement's symbol table
+        
+        SymbolInfo returnSymbol = new SymbolInfo("return", returnType, false);
+        returnSymbol.setOffset(paramOffset - 4); // Place after the last parameter
+        symbolTable.addSymbol("return", returnSymbol);
+        
+
         // Restore parent symbol table
         symbolTable = parentTable;
         
