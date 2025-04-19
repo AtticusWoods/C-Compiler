@@ -37,14 +37,14 @@ public class If extends AbstractNode implements Statement {
     }
     if (falseStatement != null) {
       builder.append(prefix).append("else\n");
-//      falseStatement.toCminus(builder, prefix);
+
       if (falseStatement instanceof CompoundStatement) {
         falseStatement.toCminus(builder, prefix);
       } else {
         falseStatement.toCminus(builder, prefix + " ");
       }
     }
-//    builder.append(prefix).append("}");
+
   }
 
   @Override
@@ -52,14 +52,16 @@ public class If extends AbstractNode implements Statement {
     MIPSResult exprMips = expression.toMIPS(code, data, symbolTable, regAllocator);
     String branchlabel = symbolTable.getUniqueLabel();
     String postElseLabel = symbolTable.getUniqueLabel();
-    code.append(String.format("beq %s $zero %s\n", exprMips.getRegister(), branchlabel));
+
+    code.append("beq ").append(exprMips.getRegister()).append(" $zero ").append(branchlabel).append("\n");
     trueStatement.toMIPS(code, data, symbolTable, regAllocator);
-    code.append(String.format("j %s\n", postElseLabel));
-    code.append(String.format("%s:\n", branchlabel)); // branch label to else
+    code.append("j ").append(postElseLabel).append("\n");
+
+    code.append(branchlabel).append(":\n"); // branch to else staememtn
     if (falseStatement != null) {
       falseStatement.toMIPS(code, data, symbolTable, regAllocator);
     }
-    code.append(String.format("%s:\n", postElseLabel)); // branch label to else
+    code.append(postElseLabel).append(":\n"); // branch to if end
     regAllocator.clear(exprMips.getRegister());
     return MIPSResult.createVoidResult();
   }

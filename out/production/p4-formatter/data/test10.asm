@@ -6,6 +6,7 @@
 .globl	main
 
 j main
+
 # Code for fib
 fib:
 # Entering a new scope
@@ -112,6 +113,7 @@ jr $ra
 # exiting scope, restoring sp 
 addi $sp $sp 0
 jr $ra
+
 # Code for main
 main:
 # Entering a new scope
