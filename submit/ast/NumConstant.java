@@ -25,17 +25,17 @@ public class NumConstant extends AbstractNode implements Expression, Node {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                         StringBuilder data,
-                         SymbolTable symbolTable,
-                         RegisterAllocator regAllocator) {
-    // Get an available register
-    String register = regAllocator.getT();
-    
-    // Load the immediate value into the register
-    code.append("li ").append(register).append(" ").append(value).append("\n");
-    
-    // Return both the register and the integer value
-    return new MIPSResult(register, null, VarType.INT, value);
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    String reg = regAllocator.getT();;
+    if (reg != null) {
+      code.append("li ")
+              .append(reg).append(" ")
+              .append(value).append("\n");
+      return MIPSResult.createRegisterResult(reg, VarType.INT);
+    } else {
+      // todo: special case if we run out of regs
+      System.out.println("ran out of regs in numConst");
+    }
+    return MIPSResult.createRegisterResult(reg, VarType.INT);
   }
 }

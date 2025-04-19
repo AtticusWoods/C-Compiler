@@ -17,8 +17,7 @@ public class StringConstant extends AbstractNode implements Expression {
   private final String value;
 
   public StringConstant(String value) {
-    // Remove quotes that ANTLR parser includes with string constants
-    this.value = value.substring(1, value.length() - 1);
+    this.value = value;
   }
 
   public void toCminus(StringBuilder builder, final String prefix) {
@@ -26,18 +25,14 @@ public class StringConstant extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                           StringBuilder data,
-                           SymbolTable symbolTable,
-                           RegisterAllocator regAllocator) {
-    // generate a unique label
-    String lbl = symbolTable.getUniqueLabel();
-    // emit into .data
-    data.append(lbl)
-            .append(":\t.asciiz\t\"")
-            .append(value)   // value no longer includes the quotes
-            .append("\"\n");
-    // tell the caller where it is
-    return MIPSResult.createAddressResult(lbl, VarType.CHAR);
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    /*
+    * create data label
+    * [new label from symboltabl]: \t.asciiz "this.value"
+    * */
+    String dataLabel = symbolTable.generateDataLabel();
+    data.append(dataLabel).append(":\t").append(".asciiz ").append(value).append("\n");
+
+    return MIPSResult.createAddressResult(dataLabel, VarType.CHAR);
   }
 }

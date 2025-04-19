@@ -12,7 +12,7 @@ main:
 # Symbols on the symbol table
 # a
 # println
-# b
+# i
 # return
 # Update the stack pointer
 addi $sp $sp -0
@@ -29,48 +29,17 @@ li $t0 -4
 # load offset + sp to get the address of a
 add $t0 $sp $t0
 # compute rhs for assignment
-li $t1 3
-# complete assignment by storing rhs in address
-sw $t1 0($t0)
-
-# get b offset from the stack pointer.
-li $t0 -8
-# load offset + sp to get the address of b
-add $t0 $sp $t0
-# compute rhs for assignment
-li $t1 2
-# complete assignment by storing rhs in address
-sw $t1 0($t0)
-
-# Entering a new scope
-# Symbols on the symbol table
-# a
-# println
-# Update the stack pointer
-addi $sp $sp -8
-# get a offset from the stack pointer.
-li $t0 -4
-# load offset + sp to get the address of a
-add $t0 $sp $t0
-# compute rhs for assignment
-li $t1 5
-# complete assignment by storing rhs in address
-sw $t1 0($t0)
-
-# println
-# get a offset from the stack pointer.
-li $t0 -4
-# load offset + sp to get the address of a
-add $t0 $sp $t0
-# load the value of a
-lw $t0 0($t0)
-# get b offset from the stack pointer.
 li $t1 0
-# load offset + sp to get the address of b
-add $t1 $sp $t1
-# load the value of b
-lw $t1 0($t1)
-add $t0 $t0 $t1
+# complete assignment by storing rhs in address
+sw $t1 0($t0)
+
+# println
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# load the value of a
+lw $t0 0($t0)
 move $a0 $t0
 li $v0 1
 syscall
@@ -78,65 +47,15 @@ la $a0 newline
 li $v0 4
 syscall
 
-# Entering a new scope
-# Symbols on the symbol table
-# println
-# b
-# Update the stack pointer
-addi $sp $sp -4
-# get b offset from the stack pointer.
-li $t0 -4
-# load offset + sp to get the address of b
-add $t0 $sp $t0
-# compute rhs for assignment
-li $t1 9
-# complete assignment by storing rhs in address
-sw $t1 0($t0)
-
 # get a offset from the stack pointer.
-li $t0 0
+li $t0 -4
 # load offset + sp to get the address of a
 add $t0 $sp $t0
 # compute rhs for assignment
 li $t1 2
-sub $t1 $zero $t1
 # complete assignment by storing rhs in address
 sw $t1 0($t0)
 
-# println
-# get a offset from the stack pointer.
-li $t0 0
-# load offset + sp to get the address of a
-add $t0 $sp $t0
-# load the value of a
-lw $t0 0($t0)
-# get b offset from the stack pointer.
-li $t1 -4
-# load offset + sp to get the address of b
-add $t1 $sp $t1
-# load the value of b
-lw $t1 0($t1)
-add $t0 $t0 $t1
-move $a0 $t0
-li $v0 1
-syscall
-la $a0 newline
-li $v0 4
-syscall
-
-# exiting scope, restoring sp 
-addi $sp $sp 4
-# get b offset from the stack pointer.
-li $t0 0
-# load offset + sp to get the address of b
-add $t0 $sp $t0
-# compute rhs for assignment
-li $t1 4
-# complete assignment by storing rhs in address
-sw $t1 0($t0)
-
-# exiting scope, restoring sp 
-addi $sp $sp 8
 # println
 # get a offset from the stack pointer.
 li $t0 -4
@@ -144,13 +63,97 @@ li $t0 -4
 add $t0 $sp $t0
 # load the value of a
 lw $t0 0($t0)
-# get b offset from the stack pointer.
+move $a0 $t0
+li $v0 1
+syscall
+la $a0 newline
+li $v0 4
+syscall
+
+# get i offset from the stack pointer.
+li $t0 -8
+# load offset + sp to get the address of i
+add $t0 $sp $t0
+# compute rhs for assignment
+li $t1 2
+# complete assignment by storing rhs in address
+sw $t1 0($t0)
+
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# compute rhs for assignment
+# get i offset from the stack pointer.
 li $t1 -8
-# load offset + sp to get the address of b
+# load offset + sp to get the address of i
 add $t1 $sp $t1
-# load the value of b
+# load the value of i
 lw $t1 0($t1)
-add $t0 $t0 $t1
+# complete assignment by storing rhs in address
+sw $t1 0($t0)
+
+# println
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# load the value of a
+lw $t0 0($t0)
+move $a0 $t0
+li $v0 1
+syscall
+la $a0 newline
+li $v0 4
+syscall
+
+# get i offset from the stack pointer.
+li $t0 -8
+# load offset + sp to get the address of i
+add $t0 $sp $t0
+# compute rhs for assignment
+li $t1 0
+# complete assignment by storing rhs in address
+sw $t1 0($t0)
+
+# println
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# load the value of a
+lw $t0 0($t0)
+move $a0 $t0
+li $v0 1
+syscall
+la $a0 newline
+li $v0 4
+syscall
+
+# println
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# load the value of a
+lw $t0 0($t0)
+move $a0 $t0
+li $v0 1
+syscall
+la $a0 newline
+li $v0 4
+syscall
+
+# println
+# get a offset from the stack pointer.
+li $t0 -4
+# load offset + sp to get the address of a
+add $t0 $sp $t0
+# load the value of a
+lw $t0 0($t0)
+li $t1 6
+mult $t0 $t1
+mflo $t0
 move $a0 $t0
 li $v0 1
 syscall
@@ -167,4 +170,4 @@ syscall
 .data
 
 newline:	.asciiz "\n"
-datalabel0:	.asciiz "This program prints 7 7 7"
+datalabel0:	.asciiz "This should print 0, 2, 2, 3, 6 and 36"

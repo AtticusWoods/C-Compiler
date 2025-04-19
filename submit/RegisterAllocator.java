@@ -20,6 +20,7 @@ public final class RegisterAllocator {
     private final boolean[] s = new boolean[8];
     private final Set<String> used = new HashSet<>();
 
+
     public RegisterAllocator() {
         clearAll();
     }
@@ -48,21 +49,24 @@ public final class RegisterAllocator {
 //        return null;
 //    }
 
-    // Returns the number of bytes used to save the registers
-    public int saveRestore(StringBuilder code, int baseOffset, boolean s_or_t, boolean save) {
-        boolean[] r = s;
-        String prefix = "$s";
-        if (!s_or_t) {
-            r = t;
-            prefix = "$t";
-        }
+    /**
+     * saves values in all active registers to stack and returns offset
+     * can also restore all active registers from stack
+     * Returns the number of bytes used to save the registers
+     * @param code empty string builder
+     * @param baseOffset sp base offset
+     * @param save if true instruction is sw else lw
+     */
+    private int saveRestore(StringBuilder code, int baseOffset, boolean save) {
+        boolean[] r = t;
+        String prefix = "$t";
         String instruction = "sw";
         if (!save) {
             instruction = "lw";
         }
         int offset = 0;
         for (int i = 0; i < r.length; ++i) {
-            if (r[i]) {
+            if (r[i]) { // if the register is being used
                 offset -= 4;
                 String str = prefix + i;
                 code.append(instruction).append(" ").append(str).append(" ").append(offset-baseOffset).append("($sp)\n");
@@ -76,7 +80,7 @@ public final class RegisterAllocator {
 //    }
 
     public int saveT(StringBuilder code, int baseOffset) {
-        return saveRestore(code, baseOffset, false, true);
+        return saveRestore(code, baseOffset, true);
     }
 
 //    public int restoreS(StringBuilder code, int baseOffset) {
@@ -84,7 +88,7 @@ public final class RegisterAllocator {
 //    }
 
     public int restoreT(StringBuilder code, int baseOffset) {
-        return saveRestore(code, baseOffset, false, false);
+        return saveRestore(code, baseOffset, false);
     }
 
     public List<String> getUsed() {
@@ -117,17 +121,6 @@ public final class RegisterAllocator {
         } else {
             throw new RuntimeException("Unexpected register in clear");
         }
-    }
-
-    public boolean isInUse(String reg) {
-        if (reg.charAt(1) == 't') {
-            int index = Integer.parseInt(reg.substring(2));
-            return index >= 0 && index < t.length && t[index];
-        } else if (reg.charAt(1) == 's') {
-            int index = Integer.parseInt(reg.substring(2));
-            return index >= 0 && index < s.length && s[index];
-        }
-        return false;
     }
 
     public void clearAll() {

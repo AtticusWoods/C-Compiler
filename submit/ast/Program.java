@@ -7,6 +7,7 @@ package submit.ast;
 import submit.MIPSResult;
 import submit.RegisterAllocator;
 import submit.SymbolTable;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +15,7 @@ import java.util.List;
  *
  * @author edwajohn
  */
-public class Program extends AbstractNode {
+public class Program extends AbstractNode implements Node {
 
   private ArrayList<Declaration> declarations;
 
@@ -35,18 +36,15 @@ public class Program extends AbstractNode {
       declaration.toCminus(builder, "");
     }
   }
-  
+
   @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                          StringBuilder data,
-                          SymbolTable symbolTable,
-                          RegisterAllocator regAllocator) {
-    
-    // Process all declarations (variables and functions)
-    for (Declaration declaration : declarations) {
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    // used by the globally available println
+    data.append("newline:\t").append(".asciiz \"\\n\"\n");
+    for (Declaration declaration: declarations) {
       declaration.toMIPS(code, data, symbolTable, regAllocator);
     }
-    
+    code.append("li $v0 10\nsyscall");
     return MIPSResult.createVoidResult();
   }
 }

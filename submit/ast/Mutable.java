@@ -6,8 +6,8 @@ package submit.ast;
 
 import submit.MIPSResult;
 import submit.RegisterAllocator;
-import submit.SymbolTable;
 import submit.SymbolInfo;
+import submit.SymbolTable;
 
 /**
  *
@@ -26,10 +26,6 @@ public class Mutable extends AbstractNode implements Expression, Node {
   public String getId() {
     return id;
   }
-  
-  public Expression getIndex() {
-    return index;
-  }
 
   @Override
   public void toCminus(StringBuilder builder, String prefix) {
@@ -40,38 +36,25 @@ public class Mutable extends AbstractNode implements Expression, Node {
       builder.append("]");
     }
   }
-  
-  @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                          StringBuilder data,
-                          SymbolTable symbolTable,
-                          RegisterAllocator regAllocator) {
-    // Find the variable in the symbol table
-    SymbolInfo symbolInfo = symbolTable.find(id);
-    if (symbolInfo != null) {
-      // Get the offset of the variable
-      int offset = symbolInfo.getOffset();
-      
-      // For parameters and local variables, use teacher's approach:
-      // Use negative offsets from stack pointer
-      String addrRegister = regAllocator.getT();
-      String resultRegister = regAllocator.getT();
-      
-      code.append("# Get ").append(id).append("'s offset from $sp from the symbol table and initialize ").append(id).append("'s address with it. We'll add $sp later.\n");
-      code.append("li ").append(addrRegister).append(" ").append(offset).append("\n");
-      code.append("# Add the stack pointer address to the offset.\n");
-      code.append("add ").append(addrRegister).append(" ").append(addrRegister).append(" $sp\n");
-      code.append("# Load the value of ").append(id).append(".\n");
-      code.append("lw ").append(resultRegister).append(" 0(").append(addrRegister).append(")\n");
-      
-      // Instead of immediately freeing the address register, store it in the result
-      // so the caller can decide when to free it
-      MIPSResult result = new MIPSResult(resultRegister, addrRegister, symbolInfo.getType(), 0);
 
-      return result;
+  @Override
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    SymbolInfo symbolInfo = symbolTable.find(id);
+    int targetOffset = symbolInfo.getOffset();
+    // binary operator expects this the return a reg with the value of this
+    // assignment expects a reg with the sp + offset of this entry in the symbol table
+    String reg = regAllocator.getT();
+    if (reg == null) {
+      System.err.println("failed to get reg in Mutable");
     }
-    
-    // If variable not found in symbol table
-    return MIPSResult.createVoidResult();
+    code.append(String.format("# get %s offset from the stack pointer.\n", id ));
+    code.append(String.format("li %s %d\n", reg, targetOffset));
+
+    code.append("# load offset + sp to get the address of ").append(id).append("\n");
+    code.append(String.format("add %s $sp %s\n", reg, reg));
+    code.append(String.format("# load the value of %s\n", id));
+    code.append(String.format("lw %s 0(%s)\n", reg, reg));
+
+    return MIPSResult.createRegisterResult(reg, symbolInfo.getType());
   }
 }

@@ -6,147 +6,159 @@
 .globl	main
 
 j main
-
-# code for add
+#code for add
 add:
-# Entering a new scope.
-# Symbols in symbol table:
-#  println
-#  x
-#  y
-#  return
-# Update the stack pointer.
+# Entering a new scope
+# Symbols on the symbol table
+# println
+# x
+# y
+# return
+# Update the stack pointer
 addi $sp $sp -0
-# Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+# get x offset from the stack pointer.
 li $t0 -4
-# Add the stack pointer address to the offset.
-add $t0 $t0 $sp
-# Load the value of x.
-lw $t1 0($t0)
-# Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
-li $t2 -8
-# Add the stack pointer address to the offset.
-add $t2 $t2 $sp
-# Load the value of y.
-lw $t3 0($t2)
-add $t1 $t1 $t3
-move $t0 $t1
-jr $ra
-# Exiting scope.
-addi $sp $sp 0
-jr $ra
-
-# code for add2
-add2:
-# Entering a new scope.
-# Symbols in symbol table:
-#  println
-#  x
-#  y
-#  return
-# Update the stack pointer.
-addi $sp $sp -0
-# Calling function add
-# Save $ra to a dedicated register
-move $t0 $ra
-# Save used temporary registers
-# Calling function add
-# Save $ra to a dedicated register
-move $t0 $ra
-# Save used temporary registers
-# Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0 -4
-# Add the stack pointer address to the offset.
-add $t0 $t0 $sp
-# Load the value of x.
-lw $t1 0($t0)
-# Get y's offset from $sp from the symbol table and initialize y's address with it. We'll add $sp later.
+# load offset + sp to get the address of x
+add $t0 $sp $t0
+# load the value of x
+lw $t0 0($t0)
+# get y offset from the stack pointer.
 li $t1 -8
-# Add the stack pointer address to the offset.
-add $t1 $t1 $sp
-# Load the value of y.
-lw $t2 0($t1)
-# Evaluate parameters and save to stack
-sw $t1 -4($sp)
-sw $t2 -8($sp)
-# Update the stack pointer
-add $sp $sp -0
-# Call the function
-jal add
-# Restore the stack pointer
-add $sp $sp 0
-# Restore $ra
-move $ra $t0
-li $t0 1
-# Evaluate parameters and save to stack
-sw $t0 -4($sp)
-sw $t0 -8($sp)
-# Update the stack pointer
-add $sp $sp -0
-# Call the function
-jal add
-# Restore the stack pointer
-add $sp $sp 0
-# Restore $ra
-move $ra $t0
+# load offset + sp to get the address of y
+add $t1 $sp $t1
+# load the value of y
+lw $t1 0($t1)
+add $t0 $t0 $t1
+# store the return value on the stack
+sw $t0 -12($sp)
 jr $ra
-# Exiting scope.
+# exiting scope, restoring sp 
 addi $sp $sp 0
 jr $ra
-
-# code for main
+#code for add2
+add2:
+# Entering a new scope
+# Symbols on the symbol table
+# println
+# x
+# y
+# return
+# Update the stack pointer
+addi $sp $sp -0
+# calling function add
+# store ra
+move $t0 $ra
+# store t registers
+sw $t0 -16($sp)
+# Evaluate args and place on the stack
+# calling function add
+# store ra
+move $t1 $ra
+# store t registers
+sw $t0 -16($sp)
+sw $t1 -20($sp)
+# Evaluate args and place on the stack
+# get x offset from the stack pointer.
+li $t2 -4
+# load offset + sp to get the address of x
+add $t2 $sp $t2
+# load the value of x
+lw $t2 0($t2)
+sw $t2 -24($sp)
+# get y offset from the stack pointer.
+li $t2 -8
+# load offset + sp to get the address of y
+add $t2 $sp $t2
+# load the value of y
+lw $t2 0($t2)
+sw $t2 -28($sp)
+# update stack pointer
+addi $sp $sp -20
+# call the function
+jal add
+# restore stack pointer
+addi $sp $sp 20
+# restore t regs
+lw $t0 -16($sp)
+lw $t1 -20($sp)
+# restore ra
+move $ra $t1
+# get return value off the stack
+lw $t1 -32($sp)
+sw $t1 -20($sp)
+li $t1 1
+sw $t1 -24($sp)
+# update stack pointer
+addi $sp $sp -16
+# call the function
+jal add
+# restore stack pointer
+addi $sp $sp 16
+# restore t regs
+lw $t0 -16($sp)
+# restore ra
+move $ra $t0
+# get return value off the stack
+lw $t0 -28($sp)
+# store the return value on the stack
+sw $t0 -12($sp)
+jr $ra
+# exiting scope, restoring sp 
+addi $sp $sp 0
+jr $ra
+#code for main
 main:
-# Entering a new scope.
-# Symbols in symbol table:
-#  println
-#  return
-# Update the stack pointer.
+# Entering a new scope
+# Symbols on the symbol table
+# println
+# return
+# Update the stack pointer
 addi $sp $sp -0
 # println
-la $a0 label_0
+la $a0 datalabel0
 li $v0 4
 syscall
 la $a0 newline
 li $v0 4
 syscall
+
 # println
-# Calling function add2
-# Save $ra to a dedicated register
+# calling function add2
+# store ra
 move $t0 $ra
-# Save used temporary registers
-sw $t1 -4($sp)
-li $t0 2
-li $t0 4
-# Evaluate parameters and save to stack
-sw $t0 -8($sp)
-sw $t0 -12($sp)
-# Update the stack pointer
-add $sp $sp -4
-# Call the function
+# store t registers
+sw $t0 -4($sp)
+# Evaluate args and place on the stack
+li $t1 2
+sw $t1 -8($sp)
+li $t1 4
+sw $t1 -12($sp)
+# update stack pointer
+addi $sp $sp -4
+# call the function
 jal add2
-# Restore the stack pointer
-add $sp $sp 4
-# Save return value temporarily
-move $t1 $t0
-# Restore used temporary registers
-lw $t1 -4($sp)
-# Restore $ra
+# restore stack pointer
+addi $sp $sp 4
+# restore t regs
+lw $t0 -4($sp)
+# restore ra
 move $ra $t0
-move $t0 $t1
+# get return value off the stack
+lw $t0 -16($sp)
 move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
 li $v0 4
 syscall
-# Exiting scope.
+
+# exiting scope, restoring sp 
 addi $sp $sp 0
 li $v0 10
 syscall
-
 # All memory structures are placed after the
 # .data assembler directive
 .data
 
-newline:	.asciiz	"\n"
-label_0:	.asciiz	"This program prints 7"
+newline:	.asciiz "\n"
+datalabel0:	.asciiz "This program prints 7"

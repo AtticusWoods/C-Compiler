@@ -18,13 +18,14 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
         this.LOGGER = LOGGER;
     }
 
-    public SymbolTable getSymbolTable() {
-        return symbolTable;
-    }
-
     private VarType getVarType(CminusParser.TypeSpecifierContext ctx) {
         final String t = ctx.getText();
         return (t.equals("int")) ? VarType.INT : (t.equals("bool")) ? VarType.BOOL : VarType.CHAR;
+    }
+
+    // TODO: 4/18/23 this is just a getter should it be something more?
+    public SymbolTable getSymbolTable(){
+        return this.symbolTable;
     }
 
     @Override public Node visitProgram(CminusParser.ProgramContext ctx) {
@@ -60,49 +61,23 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
             returnType = getVarType(ctx.typeSpecifier());
         }
         String id = ctx.ID().getText();
-        
-        // Add function to the global symbol table
-        symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
-        
-        // Create a new scope for the function body
-        SymbolTable parentTable = symbolTable;
-        symbolTable = symbolTable.createChild();
-        
-        // Process parameters and add them to the function's symbol table
-        List<Param> params = new ArrayList<>();
-        
-        // For function parameters, calculate offsets using negative values
-        // This exactly matches the teacher's example where parameters are
-        // accessed at -4, -8, etc. from the stack pointer
-        int paramOffset = -4; // First parameter at -4($sp), second at -8($sp), etc.
-        
-        for (CminusParser.ParamContext p : ctx.param()) {
-            Param param = (Param) visitParam(p);
-            params.add(param);
-            
-            // Add parameter to symbol table with offset matching teacher's example
-            SymbolInfo paramInfo = new SymbolInfo(param.getId(), param.getType(), false);
-            paramInfo.setOffset(paramOffset);
-            symbolTable.addSymbol(param.getId(), paramInfo);
-            
-            // Update offset for next parameter
-            paramOffset -= 4; // Each parameter takes 4 bytes
-        }
-        
-        // Visit function body with parameters in scope
-        Statement statement = (Statement) visitStatement(ctx.statement());
-        
-        // Add special return symbol to the compound statement's symbol table
-        
-        SymbolInfo returnSymbol = new SymbolInfo("return", returnType, false);
-        returnSymbol.setOffset(paramOffset - 4); // Place after the last parameter
-        symbolTable.addSymbol("return", returnSymbol);
-        
 
-        // Restore parent symbol table
-        symbolTable = parentTable;
-        
-        return new FunDeclaration(returnType, id, params, statement);
+        symbolTable = symbolTable.createChild();
+        List<Param> params = new ArrayList<>();
+        for (CminusParser.ParamContext p : ctx.param()) {
+            params.add((Param) visitParam(p));
+        }
+        VarType funcType = null;
+        if (ctx.typeSpecifier() != null ) {
+            funcType = VarType.fromString(ctx.typeSpecifier().getText());
+        }
+        symbolTable.addSymbol("return", new SymbolInfo("return", funcType, funcType == null));
+
+        CompoundStatement compoundStatement = (CompoundStatement) visitStatement(ctx.statement());
+        symbolTable = symbolTable.getParent();
+
+        symbolTable.addSymbol(id, new SymbolInfo(id, returnType, true));
+        return new FunDeclaration(returnType, id, params, compoundStatement);
     }
 
     @Override public Node visitParam(CminusParser.ParamContext ctx) {
@@ -113,19 +88,20 @@ public class ASTVisitor extends CminusBaseVisitor<Node> {
     }
 
     @Override public Node visitCompoundStmt(CminusParser.CompoundStmtContext ctx) {
-        SymbolTable parentTable = symbolTable;
-        symbolTable = symbolTable.createChild();
         List<Statement> statements = new ArrayList<>();
         for (CminusParser.VarDeclarationContext d : ctx.varDeclaration()) {
             statements.add((VarDeclaration) visitVarDeclaration(d));
         }
         for (CminusParser.StatementContext d : ctx.statement()) {
-            statements.add((Statement) visitStatement(d));
+            if (d.compoundStmt() != null) {
+                symbolTable = symbolTable.createChild();
+                statements.add((Statement) visitStatement(d));
+                symbolTable = symbolTable.getParent();
+            } else {
+                statements.add((Statement) visitStatement(d));
+            }
         }
-        CompoundStatement compoundStatement = new CompoundStatement(statements);
-        compoundStatement.setSymbolTable(symbolTable);  // Save the symbol table in the compound statement
-        symbolTable = parentTable;  // Restore parent symbol table
-        return compoundStatement;
+        return new CompoundStatement(statements, symbolTable);
     }
 
     @Override public Node visitExpressionStmt(CminusParser.ExpressionStmtContext ctx) {

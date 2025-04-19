@@ -7,13 +7,8 @@ package submit.ast;
 import submit.MIPSResult;
 import submit.RegisterAllocator;
 import submit.SymbolTable;
-import submit.SymbolInfo;
-import java.util.ArrayList;
-import java.util.HashSet;
+
 import java.util.List;
-import java.util.Set;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -22,42 +17,16 @@ import java.util.Map;
 public class CompoundStatement extends AbstractNode implements Statement {
 
   private final List<Statement> statements;
-  private SymbolTable symbolTable; // Track the symbol table for this scope
+  private final SymbolTable localSymbolTable;
 
   public CompoundStatement(List<Statement> statements) {
     this.statements = statements;
-    this.symbolTable = null;
-  }
-  
-  // Set the symbol table for this compound statement
-  public void setSymbolTable(SymbolTable symbolTable) {
-    this.symbolTable = symbolTable;
-  }
-  
-  // Get the set of symbol names in this scope
-  public Set<String> getSymbolNames() {
-    Set<String> symbolNames = new HashSet<>();
-    
-    // Add standard symbols
-    symbolNames.add("println");
-    symbolNames.add("return");
-    
-    // Extract variable declarations from statements
-    for (Statement stmt : statements) {
-      if (stmt instanceof VarDeclaration) {
-        VarDeclaration varDecl = (VarDeclaration) stmt;
-        for (String id : varDecl.getIds()) {
-          symbolNames.add(id);
-        }
-      }
-    }
-    
-    return symbolNames;
+    this.localSymbolTable = new SymbolTable();
   }
 
-  // Get the statements in this compound statement
-  public List<Statement> getStatements() {
-    return statements;
+  public CompoundStatement(List<Statement> statements, SymbolTable symbolTable) {
+    this.statements = statements;
+    this.localSymbolTable = symbolTable;
   }
 
   @Override
@@ -68,31 +37,24 @@ public class CompoundStatement extends AbstractNode implements Statement {
     }
     builder.append(prefix).append("}\n");
   }
-  
+
   @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                         StringBuilder data,
-                         SymbolTable symbolTable,
-                         RegisterAllocator regAllocator) {
-    // Use this scope's symbol table if available
-    SymbolTable scopeTable = (this.symbolTable != null) ? this.symbolTable : symbolTable;
-    
-    // First pass: process all variable declarations to calculate stack space needed
-    int totalVarSize = 0;
-    for (Statement statement : statements) {
-      if (statement instanceof VarDeclaration) {
-        statement.toMIPS(code, data, scopeTable, regAllocator);
-        totalVarSize += ((VarDeclaration) statement).getTotalSize();
-      }
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+    code.append("# Entering a new scope\n");
+    if (localSymbolTable == null) {
+      return MIPSResult.createVoidResult();
     }
-    
-    // Second pass: process all non-declaration statements
-    for (Statement statement : statements) {
-      if (!(statement instanceof VarDeclaration)) {
-        statement.toMIPS(code, data, scopeTable, regAllocator);
-      }
+    code.append("# Symbols on the symbol table\n");
+    for (String key: localSymbolTable.getTable().keySet()) {
+      code.append(String.format("# %s\n", key));
     }
-    
+    code.append("# Update the stack pointer\n");
+    code.append(String.format("addi $sp $sp -%d\n", symbolTable.getARSize()));
+    for (Statement s : statements) {
+      s.toMIPS(code, data, localSymbolTable, regAllocator);
+    }
+    code.append("# exiting scope, restoring sp \n");
+    code.append(String.format("addi $sp $sp %d\n", symbolTable.getARSize()));
     return MIPSResult.createVoidResult();
   }
 }

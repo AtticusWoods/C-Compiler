@@ -15,28 +15,24 @@ public class SymbolInfo {
   private final String id;
   // In the case of a function, type is the return type
   private final VarType type;
+  private int offset = 0;
   private final boolean function;
-  private int offset; // Stack offset for variables
-  private int size;   // Size in bytes for variables (4 for most primitives)
 
   public SymbolInfo(String id, VarType type, boolean function) {
     this.id = id;
     this.type = type;
     this.function = function;
-    this.offset = 0;
-    this.size = 4; // Default size for int, bool, char
   }
 
-  public String getId() {
-    return id;
+  // for void functions
+  public SymbolInfo(String id){
+    this.id = id;
+    this.type = null;
+    this.function = true;
   }
 
   public VarType getType() {
     return type;
-  }
-
-  public boolean isFunction() {
-    return function;
   }
 
   public int getOffset() {
@@ -47,12 +43,8 @@ public class SymbolInfo {
     this.offset = offset;
   }
 
-  public int getSize() {
-    return size;
-  }
-
-  public void setSize(int size) {
-    this.size = size;
+  public boolean isFunction() {
+    return function;
   }
 
   @Override

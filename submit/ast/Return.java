@@ -6,6 +6,7 @@ package submit.ast;
 
 import submit.MIPSResult;
 import submit.RegisterAllocator;
+import submit.SymbolInfo;
 import submit.SymbolTable;
 
 /**
@@ -33,25 +34,17 @@ public class Return extends AbstractNode implements Statement {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, 
-                           StringBuilder data,
-                           SymbolTable symbolTable,
-                           RegisterAllocator regAllocator) {
-    // If there's an expression to return
-    if (expr != null) {
-      // Evaluate the expression first
-      MIPSResult exprResult = expr.toMIPS(code, data, symbolTable, regAllocator);
-      
-      // Move result to $t0 (our standard return register)
-      if (exprResult.getRegister() != null && !exprResult.getRegister().equals("$t0")) {
-        code.append("move $t0 ").append(exprResult.getRegister()).append("\n");
-        regAllocator.clear(exprResult.getRegister());
-      }
-    }
-    
-    // Return to caller
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+
+    MIPSResult exprMips = expr.toMIPS(code, data, symbolTable, regAllocator);
+    String reg = exprMips.getRegister();
+    SymbolInfo returnSymbol = symbolTable.find("return");
+    int offset = returnSymbol.getOffset();
+    // place offset in reg
+    code.append("# store the return value on the stack\n");
+    code.append(String.format("sw %s %d($sp)\n", reg, offset));
     code.append("jr $ra\n");
-    
+    regAllocator.clear(reg);
     return MIPSResult.createVoidResult();
   }
 }

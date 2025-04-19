@@ -35,110 +35,67 @@ public class BinaryOperator extends AbstractNode implements Expression {
     builder.append(" ").append(type).append(" ");
     rhs.toCminus(builder, prefix);
   }
-  
+
   @Override
-  public MIPSResult toMIPS(StringBuilder code,
-                          StringBuilder data,
-                          SymbolTable symbolTable,
-                          RegisterAllocator regAllocator) {
-        // Evaluate the left-hand side expression and get its result
-    MIPSResult lhsResult = lhs.toMIPS(code, data, symbolTable, regAllocator);
-    String lhsRegister = lhsResult.getRegister();
-    
-    // Evaluate the right-hand side expression and get its result
-    MIPSResult rhsResult = rhs.toMIPS(code, data, symbolTable, regAllocator);
-    String rhsRegister = rhsResult.getRegister();
-    
-    // The result will be stored in the LHS register
-    String resultRegister = lhsRegister;
-    
-    // Generate MIPS code for the binary operation
-    switch (type) {
-      case PLUS:
-        code.append("add ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case MINUS:
-        code.append("sub ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case TIMES:
-        code.append("mult ").append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        code.append("mflo ").append(resultRegister).append("\n");
-        break;
-      case DIVIDE:
-        code.append("div ").append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        code.append("mflo ").append(resultRegister).append("\n");
-        break;
-      case MOD:
-        code.append("div ").append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        code.append("mfhi ").append(resultRegister).append("\n");
-        break;
-      case EQ:
-        code.append("seq ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case NE:
-        code.append("sne ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case LT:
-        code.append("slt ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case LE:
-        code.append("sle ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case GT:
-        code.append("sgt ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case GE:
-        code.append("sge ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case AND:
-        code.append("and ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      case OR:
-        code.append("or ").append(resultRegister).append(" ")
-            .append(lhsRegister).append(" ")
-            .append(rhsRegister).append("\n");
-        break;
-      default:
-        // Handle unsupported operation
-        break;
+  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+
+
+    MIPSResult lhsMips = lhs.toMIPS(code, data, symbolTable, regAllocator);
+    String lhsReg = lhsMips.getRegister();
+    MIPSResult rhsMips = rhs.toMIPS(code, data, symbolTable, regAllocator);
+    String rhsReg = rhsMips.getRegister();
+
+    if (type == BinaryOperatorType.PLUS || type == BinaryOperatorType.MINUS) {
+      if (type == BinaryOperatorType.PLUS) {
+        code.append("add ");
+      } else {
+        code.append("sub ");
+      }
+      code.append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+      
+    } else if (type == BinaryOperatorType.DIVIDE || type == BinaryOperatorType.TIMES) {
+      if (type == BinaryOperatorType.TIMES) {
+        code.append("mult ");
+      } else {
+        code.append("div ");
+      }
+      code.append(lhsReg).append(" ").append(rhsReg).append("mflo ").append(lhsReg).append("\n");
+
+      code.append(String.format("%s %s %s\n",
+                      type == BinaryOperatorType.DIVIDE ? "div" : "mult",
+                      lhsReg,
+                      rhsReg))
+              .append(String.format("mflo %s\n", lhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+    } else if (type == BinaryOperatorType.LT) {
+      code.append(String.format("slt %s %s %s\n", lhsReg, lhsReg, rhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+    } else if (type == BinaryOperatorType.GT) {
+      code.append(String.format("slt %s %s %s\n", lhsReg, rhsReg, lhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+    } else if (type == BinaryOperatorType.LE) {
+      code.append(String.format("slt %s %s %s\n", lhsReg, rhsReg, lhsReg));
+      code.append(String.format("subi %s %s 1\n", lhsReg, lhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+    } else if (type == BinaryOperatorType.GE) {
+      code.append(String.format("slt %s %s %s\n", lhsReg, lhsReg, rhsReg));
+      code.append(String.format("subi %s %s 1\n", lhsReg, lhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+    } else if (type == BinaryOperatorType.EQ) {
+      code.append(String.format("xor %s %s %s\n", lhsReg, lhsReg, rhsReg));
+      code.append(String.format("slti %s %s 1\n", lhsReg, lhsReg));
+      regAllocator.clear(rhsReg);
+      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
     }
-    
-    // Free the address registers now that we're done with them
-    if (lhsResult.getAddress() != null) {
-        regAllocator.clear(lhsResult.getAddress());
-    }
-    
-    if (rhsResult.getAddress() != null) {
-        regAllocator.clear(rhsResult.getAddress());
-    }
-    
-    // Free the right-hand side register as we've now used its value
-    if (!rhsRegister.equals(resultRegister)) {
-      regAllocator.clear(rhsRegister);
-    }
-    
-    // Return a reference to the result register
-    return MIPSResult.createRegisterResult(resultRegister, VarType.INT);
+    System.out.println("Need to implement more binary operators: " + type.toString());
+    return super.toMIPS(code, data, symbolTable, regAllocator);
   }
 }
