@@ -32,9 +32,9 @@ fum:
 # Entering a new scope.
 # Symbols in symbol table:
 #  println
+#  return
 #  a
 #  b
-#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
@@ -61,12 +61,12 @@ add $t0 $t0 $sp
 # Load the value of b.
 lw $t1 0($t0)
 # Get a's offset from $sp from the symbol table and initialize a's address with it. We'll add $sp later.
-li $t0 -4
+li $t2 -4
 # Add the stack pointer address to the offset.
-add $t0 $t0 $sp
+add $t2 $t2 $sp
 # Load the value of a.
-lw $t2 0($t0)
-sub $t1 $t1 $t2
+lw $t3 0($t2)
+sub $t1 $t1 $t3
 li $t0 4
 add $t1 $t1 $t0
 move $a0 $t1
@@ -91,6 +91,8 @@ add $sp $sp 12
 lw $t0 -12($sp)
 # Restore $ra
 move $ra $t0
+# Get return value off stack
+lw $t0 -16($sp)
 # Exiting scope.
 addi $sp $sp 0
 jr $ra
@@ -126,22 +128,26 @@ add $sp $sp 4
 lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+# Get return value off stack
+lw $t0 -8($sp)
 # Calling function fum
 # Save $ra to a register
 move $t0 $ra
 # Save $t0-9 registers
-sw $t0 -8($sp)
+sw $t0 -4($sp)
 # Evaluate parameters and save to stack
 # Update the stack pointer
-add $sp $sp -8
+add $sp $sp -4
 # Call the function
 jal fum
 # Restore the stack pointer
-add $sp $sp 8
+add $sp $sp 4
 # Restore $t0-9 registers
-lw $t0 -8($sp)
+lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
+# Get return value off stack
+lw $t0 -8($sp)
 # Exiting scope.
 addi $sp $sp 0
 li $v0 10

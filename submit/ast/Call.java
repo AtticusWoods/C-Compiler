@@ -92,23 +92,29 @@ public class Call extends AbstractNode implements Expression {
       // Handle regular function calls with parameters
       code.append("# Calling function ").append(id).append("\n");
 
-      // Save the return address register
-      code.append("# Save $ra to a register\n");
-      code.append("move $t0 $ra\n");
+      // First, get a dedicated register for saving $ra that won't be overwritten
+      String raRegister = regAllocator.getT();
+      code.append("# Save $ra to a dedicated register\n");
+      code.append("move ").append(raRegister).append(" $ra\n");
+      
+      // Calculate initial stack space needed for base register saving
+      symbolTable.addToActivationRecordSize(4);  // For $ra initially
+      int baseOffset = symbolTable.getActivationRecordSize();
 
-      // Calculate stack space needed
-      symbolTable.addToActivationRecordSize(4);  // For $ra
-      int savedRegsSpace = symbolTable.getActivationRecordSize();  // This matches the teacher's example
-
-      // Save $t0 (which contains $ra)
-      code.append("# Save $t0-9 registers\n");
-      code.append("sw $t0 -").append(savedRegsSpace).append("($sp)\n");
-
-      // Evaluate parameters and save to stack
+      // Save all used temporary registers BEFORE evaluating any parameters
+      code.append("# Save used temporary registers\n");
+      int regSaveSpace = regAllocator.saveT(code, baseOffset);
+      
+      // Update activation record size to include space for saved registers
+      if (regSaveSpace > 0) {
+        symbolTable.addToActivationRecordSize(regSaveSpace);
+      }
+      
+      // Get total space needed for saved registers
+      int savedRegsSpace = symbolTable.getActivationRecordSize();
+      
+      // Now evaluate parameters and save to stack (after saving registers)
       code.append("# Evaluate parameters and save to stack\n");
-
-      // Process parameters - matching teacher's offsets exactly
-
 
       for (int i = 0; i < args.size(); i++) {
         symbolTable.addToActivationRecordSize(4);
@@ -129,7 +135,7 @@ public class Call extends AbstractNode implements Expression {
       }
       symbolTable.addToActivationRecordSize(-4 * args.size());
 
-      // Update stack pointer for function call - exactly 12 as in the teacher's example
+      // Update stack pointer for function call
       code.append("# Update the stack pointer\n");
       code.append("add $sp $sp -").append(savedRegsSpace).append("\n");
 
@@ -141,15 +147,17 @@ public class Call extends AbstractNode implements Expression {
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(savedRegsSpace).append("\n");
 
-      // Restore saved registers
-      code.append("# Restore $t0-9 registers\n");
-      code.append("lw $t0 -").append(savedRegsSpace).append("($sp)\n");
-      symbolTable.addToActivationRecordSize(-4);
+      // Restore used temporary registers
+      code.append("# Restore used temporary registers\n");
+      regAllocator.restoreT(code, baseOffset);
+      
+      // Account for stack space used by saved registers
+      symbolTable.addToActivationRecordSize(-savedRegsSpace);
 
-
-      // Restore return address
+      // Restore return address from our dedicated register
       code.append("# Restore $ra\n");
-      code.append("move $ra $t0\n");
+      code.append("move $ra ").append(raRegister).append("\n");
+      regAllocator.clear(raRegister);
       
       // Get the return value from the stack using the special return symbol location
       // We need to calculate where the return value is stored in relation to the current stack pointer
