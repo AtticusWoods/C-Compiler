@@ -49,12 +49,12 @@ public class CompoundStatement extends AbstractNode implements Statement {
       code.append(String.format("# %s\n", key));
     }
     code.append("# Update the stack pointer\n");
-    code.append(String.format("addi $sp $sp -%d\n", symbolTable.getARSize()));
+    code.append(String.format("addi $sp $sp -%d\n", symbolTable.getActivationRecordSize()));
     for (Statement s : statements) {
       s.toMIPS(code, data, localSymbolTable, regAllocator);
     }
     code.append("# exiting scope, restoring sp \n");
-    code.append(String.format("addi $sp $sp %d\n", symbolTable.getARSize()));
+    code.append(String.format("addi $sp $sp %d\n", symbolTable.getActivationRecordSize()));
     return MIPSResult.createVoidResult();
   }
 }

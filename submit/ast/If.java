@@ -50,8 +50,8 @@ public class If extends AbstractNode implements Statement {
   @Override
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
     MIPSResult exprMips = expression.toMIPS(code, data, symbolTable, regAllocator);
-    String branchlabel = symbolTable.generateDataLabel();
-    String postElseLabel = symbolTable.generateDataLabel();
+    String branchlabel = symbolTable.getUniqueLabel();
+    String postElseLabel = symbolTable.getUniqueLabel();
     code.append(String.format("beq %s $zero %s\n", exprMips.getRegister(), branchlabel));
     trueStatement.toMIPS(code, data, symbolTable, regAllocator);
     code.append(String.format("j %s\n", postElseLabel));

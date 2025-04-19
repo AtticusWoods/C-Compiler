@@ -24,14 +24,14 @@ lw $t0 0($t0)
 li $t1 0
 xor $t0 $t0 $t1
 slti $t0 $t0 1
-beq $t0 $zero datalabel0
+beq $t0 $zero label_0
 li $t1 1
 # store the return value on the stack
 sw $t1 -8($sp)
 jr $ra
-j datalabel1
-datalabel0:
-datalabel1:
+j label_1
+label_0:
+label_1:
 # get i offset from the stack pointer.
 li $t0 -4
 # load offset + sp to get the address of i
@@ -41,15 +41,15 @@ lw $t0 0($t0)
 li $t1 1
 xor $t0 $t0 $t1
 slti $t0 $t0 1
-beq $t0 $zero datalabel2
+beq $t0 $zero label_2
 li $t1 1
 # store the return value on the stack
 sw $t1 -8($sp)
 jr $ra
-j datalabel3
-datalabel2:
-datalabel3:
-# calling function fib
+j label_3
+label_2:
+label_3:
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -76,7 +76,7 @@ lw $t0 -12($sp)
 move $ra $t0
 # get return value off the stack
 lw $t0 -20($sp)
-# calling function fib
+# function call fib
 # store ra
 move $t1 $ra
 # store t registers
@@ -121,7 +121,7 @@ main:
 # Update the stack pointer
 addi $sp $sp -0
 # println
-la $a0 datalabel4
+la $a0 label_4
 li $v0 4
 syscall
 la $a0 newline
@@ -129,7 +129,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -157,7 +157,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -185,7 +185,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -213,7 +213,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -241,7 +241,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -269,7 +269,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -297,7 +297,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -325,7 +325,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -353,7 +353,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -381,7 +381,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -409,7 +409,7 @@ li $v0 4
 syscall
 
 # println
-# calling function fib
+# function call fib
 # store ra
 move $t0 $ra
 # store t registers
@@ -445,4 +445,4 @@ syscall
 .data
 
 newline:	.asciiz "\n"
-datalabel4:	.asciiz "This program prints the first 11 numbers of the Fibonacci sequence"
+label_4:	.asciiz "This program prints the first 11 numbers of the Fibonacci sequence"

@@ -30,7 +30,7 @@ public class StringConstant extends AbstractNode implements Expression {
     * create data label
     * [new label from symboltabl]: \t.asciiz "this.value"
     * */
-    String dataLabel = symbolTable.generateDataLabel();
+    String dataLabel = symbolTable.getUniqueLabel();
     data.append(dataLabel).append(":\t").append(".asciiz ").append(value).append("\n");
 
     return MIPSResult.createAddressResult(dataLabel, VarType.CHAR);
