@@ -48,12 +48,12 @@ jr $ra
 j label_3
 label_2:
 label_3:
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -12($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 # Get i's offset from $sp from the symbol table and initialize
 li $t1 -4
 # Add the stack pointer address to the offset.
@@ -63,25 +63,25 @@ lw $t1 0($t1)
 li $t2 1
 sub $t1 $t1 $t2
 sw $t1 -16($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -12
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 12
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -12($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -20($sp)
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t1 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -12($sp)
 sw $t1 -16($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 # Get i's offset from $sp from the symbol table and initialize
 li $t2 -4
 # Add the stack pointer address to the offset.
@@ -91,23 +91,23 @@ lw $t2 0($t2)
 li $t3 2
 sub $t2 $t2 $t3
 sw $t2 -20($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -16
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 16
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -12($sp)
 lw $t1 -16($sp)
-# restore ra
+# Restore $ra
 move $ra $t1
-# get return value off the stack
+# Get return value off the stack
 lw $t1 -24($sp)
 add $t0 $t0 $t1
 sw $t0 -8($sp)
 jr $ra
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -126,27 +126,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 0
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -154,27 +153,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 1
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -182,27 +180,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 2
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -210,27 +207,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 3
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -238,27 +234,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 4
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -266,27 +261,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 5
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -294,27 +288,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 6
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -322,27 +315,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 7
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -350,27 +342,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 8
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -378,27 +369,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 9
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -406,27 +396,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call fib
-# store ra
+# Calling function fib
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 10
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fib
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -434,11 +423,11 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data

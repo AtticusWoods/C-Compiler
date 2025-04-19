@@ -48,17 +48,17 @@ public class Assignment extends AbstractNode implements Expression, Node {
     if (reg == null) {
       System.err.println("Assignment reg failure");
     }
-    code.append("# Get ").append(mutable.getId()).append("' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.\n");
-    code.append("li ").append(reg).append(targetOffset).append("\n");
+    code.append("# Get ").append(mutable.getId()).append("'s offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.\n");
+    code.append("li ").append(reg).append(" ").append(targetOffset).append("\n");
 
     code.append("# Add the stack pointer address to the offset.").append("\n");
-    code.append(String.format("add %s $sp %s\n", reg, reg));
+    code.append("add ").append(reg).append(" $sp ").append(reg).append("\n");
 
     code.append("# Compute rhs for assignment\n");
     MIPSResult expressionMips = rhs.toMIPS(code, data, symbolTable, regAllocator); // returns reg with result of rhs
 
     code.append("# Complete assignment statement with store\n");
-    code.append(String.format("sw %s 0(%s)\n", expressionMips.getRegister(), reg));
+    code.append("sw ").append(expressionMips.getRegister()).append(" 0(").append(reg).append(")\n");
 
     regAllocator.clear(expressionMips.getRegister());
     regAllocator.clear(reg);
