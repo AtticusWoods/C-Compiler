@@ -48,7 +48,7 @@ public class Program extends AbstractNode implements Node {
       declaration.toMIPS(code, data, symbolTable, regAllocator);
     }
 
-    code.append("li $v0 10\nsyscall");
+    code.append("li $v0 10\nsyscall\n");
     return MIPSResult.createVoidResult();
   }
 }

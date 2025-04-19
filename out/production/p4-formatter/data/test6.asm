@@ -83,20 +83,18 @@ move $ra $t0
 li $t0-4
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
-# compute rhs for assignment
+# Compute rhs for assignment
 li $t1 5
-# complete assignment by storing rhs in address
+# Complete assignment statement with store
 sw $t1 0($t0)
-
 # Get b' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0-8
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
-# compute rhs for assignment
+# Compute rhs for assignment
 li $t1 2
-# complete assignment by storing rhs in address
+# Complete assignment statement with store
 sw $t1 0($t0)
-
 # Calling function add
 # Save $ra to a register
 move $t0 $ra
