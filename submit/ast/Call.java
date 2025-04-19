@@ -6,6 +6,7 @@ package submit.ast;
 
 import submit.MIPSResult;
 import submit.RegisterAllocator;
+import submit.SymbolInfo;
 import submit.SymbolTable;
 import java.util.ArrayList;
 import java.util.List;
@@ -149,8 +150,24 @@ public class Call extends AbstractNode implements Expression {
       // Restore return address
       code.append("# Restore $ra\n");
       code.append("move $ra $t0\n");
-
-      return MIPSResult.createVoidResult();
+      
+      // Get the return value from the stack using the special return symbol location
+      // We need to calculate where the return value is stored in relation to the current stack pointer
+      int paramSize = 4 * args.size(); // Size of all parameters
+      int returnOffset = savedRegsSpace + paramSize + 4; // +4 for the return value itself
+      
+      // Retrieve the return value and store it in $t0
+      code.append("# Get return value off stack\n");
+      code.append("lw $t0 -").append(returnOffset).append("($sp)\n");
+      
+      // Return the result in $t0
+      String resultReg = "$t0";  // Always use t0 for consistency with other parts of the compiler
+      
+      // Get the function's return type from the symbol table
+      SymbolInfo funcInfo = symbolTable.find(id);
+      VarType returnType = funcInfo != null ? funcInfo.getType() : VarType.INT;
+      
+      return MIPSResult.createRegisterResult(resultReg, returnType);
     }
   }
 }
