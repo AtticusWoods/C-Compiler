@@ -82,8 +82,8 @@ public class SymbolTable {
   public static String getUniqueLabel() {
     return "label_" + (labelCounter++);
   }
-
-  /**
+  
+    /**
    * Allocates a temporary register ($t0-$t9)
    * @return The register number if available, -1 if all registers are in use
    */

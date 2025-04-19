@@ -76,9 +76,6 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
         code.append("#  println\n");
       }
       
-      // Always add the "return" symbol for consistency
-      code.append("#  return\n");
-      
       // Calculate the stack space needed for local variables
       int frameSize = 0;
       if (statement instanceof CompoundStatement) {
@@ -93,7 +90,6 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       }
       
       // Update stack pointer (for local variables)
-// In the teacher's example, this is always 0 for main
       code.append("# Update the stack pointer.\n");
       code.append("addi $sp $sp -").append(frameSize).append("\n");
       
@@ -148,25 +144,7 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       code.append("# Update the stack pointer.\n");
       code.append("addi $sp $sp -").append(localVarSize).append("\n");
       
-      // For each parameter, get its value from stack and use it in the function
-      for (int i = 0; i < params.size(); i++) {
-        Param param = params.get(i);
-        String paramId = param.getId();
-        
-        // Parameters are at fixed offsets from $sp: first param at -4, second at -8, etc.
-        int paramOffset = -4 * (i + 1);
-        
-        code.append("# Get ").append(paramId).append("'s offset from $sp from the symbol table and initialize ")
-            .append(paramId).append("'s address with it. We'll add $sp later.\n");
-        code.append("li $t1 ").append(paramOffset).append("\n");
-        
-        code.append("# Add the stack pointer address to the offset.\n");
-        code.append("add $t1 $t1 $sp\n");
-        
-        // Load the value
-        code.append("# Load the value of ").append(paramId).append(".\n");
-        code.append("lw $t0 0($t1)\n");
-      }
+
       
       // Generate the body of the function
       statement.toMIPS(code, data, symbolTable, regAllocator);

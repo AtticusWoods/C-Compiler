@@ -22,7 +22,7 @@ li $t0 -4
 add $t0 $t0 $sp
 # Load the value of x.
 lw $t1 0($t0)
-sw $t1 -8($sp)hi
+sw $t1 -8($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -51,7 +51,7 @@ add $t0 $t0 $sp
 # Load the value of y.
 lw $t2 0($t0)
 add $t1 $t1 $t2
-sw $t1 -8($sp)hi
+sw $t1 -12($sp)
 jr $ra
 # Exiting scope.
 addi $sp $sp 0
@@ -63,10 +63,11 @@ main:
 # Symbols in symbol table:
 #  println
 #  return
+#  return
 # Update the stack pointer.
 addi $sp $sp -0
 # println
-la $a0 datalabel0
+la $a0 label_0
 li $v0 4
 syscall
 la $a0 newline
@@ -92,8 +93,8 @@ lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
 # Get return value off stack
-lw $t0 -0($sp)
-move $t0 $t0
+lw $t0 -12($sp)
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
@@ -106,10 +107,10 @@ move $t0 $ra
 # Save $t0-9 registers
 sw $t0 -4($sp)
 # Evaluate parameters and save to stack
-li $t1 3
-sw $t1 -8($sp)
-li $t1 4
-sw $t1 -12($sp)
+li $t0 3
+sw $t0 -8($sp)
+li $t0 4
+sw $t0 -12($sp)
 # Update the stack pointer
 add $sp $sp -4
 # Call the function
@@ -121,8 +122,8 @@ lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
 # Get return value off stack
-lw $t0 -0($sp)
-move $t1 $t0
+lw $t0 -16($sp)
+move $a0 $t0
 li $v0 1
 syscall
 la $a0 newline
@@ -138,4 +139,4 @@ syscall
 .data
 
 newline:	.asciiz	"\n"
-datalabel0:	.asciiz	"This program prints 7 7"
+label_0:	.asciiz	"This program prints 7 7"
