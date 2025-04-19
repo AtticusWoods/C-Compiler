@@ -28,9 +28,11 @@ public class ParenExpression extends AbstractNode implements Expression {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
     MIPSResult exprMips = expression.toMIPS(code, data, symbolTable, regAllocator);
-    // TODO: 4/19/23 potential bug I am assuming all paren expressions return register result
     return MIPSResult.createRegisterResult(exprMips.getRegister(), exprMips.getType());
   }
 }

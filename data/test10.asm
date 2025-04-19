@@ -20,14 +20,13 @@ addi $sp $sp -0
 li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
-#Load the value of i.
+# Load the value of i.
 lw $t0 0($t0)
 li $t1 0
 xor $t0 $t0 $t1
 slti $t0 $t0 1
 beq $t0 $zero label_0
 li $t1 1
-# store the return value on the stack
 sw $t1 -8($sp)
 jr $ra
 j label_1
@@ -37,14 +36,13 @@ label_1:
 li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
-#Load the value of i.
+# Load the value of i.
 lw $t0 0($t0)
 li $t1 1
 xor $t0 $t0 $t1
 slti $t0 $t0 1
 beq $t0 $zero label_2
 li $t1 1
-# store the return value on the stack
 sw $t1 -8($sp)
 jr $ra
 j label_3
@@ -60,7 +58,7 @@ sw $t0 -12($sp)
 li $t1 -4
 # Add the stack pointer address to the offset.
 add $t1 $sp $t1
-#Load the value of i.
+# Load the value of i.
 lw $t1 0($t1)
 li $t2 1
 sub $t1 $t1 $t2
@@ -88,7 +86,7 @@ sw $t1 -16($sp)
 li $t2 -4
 # Add the stack pointer address to the offset.
 add $t2 $sp $t2
-#Load the value of i.
+# Load the value of i.
 lw $t2 0($t2)
 li $t3 2
 sub $t2 $t2 $t3
@@ -107,7 +105,6 @@ move $ra $t1
 # get return value off the stack
 lw $t1 -24($sp)
 add $t0 $t0 $t1
-# store the return value on the stack
 sw $t0 -8($sp)
 jr $ra
 # exiting scope, restoring sp 

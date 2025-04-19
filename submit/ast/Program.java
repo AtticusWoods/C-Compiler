@@ -38,12 +38,16 @@ public class Program extends AbstractNode implements Node {
   }
 
   @Override
-  public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
-    // used by the globally available println
+  public MIPSResult toMIPS(StringBuilder code,
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
+
     data.append("newline:\t").append(".asciiz \"\\n\"\n");
     for (Declaration declaration: declarations) {
       declaration.toMIPS(code, data, symbolTable, regAllocator);
     }
+
     code.append("li $v0 10\nsyscall");
     return MIPSResult.createVoidResult();
   }
