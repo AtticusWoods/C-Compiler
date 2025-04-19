@@ -16,6 +16,14 @@ main:
 # return
 # Update the stack pointer
 addi $sp $sp -0
+# Get a's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -4
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 3
+# Complete assignment statement with store
+sw $t1 0($t0)
 # println
 la $a0 label_0
 li $v0 4
@@ -23,7 +31,6 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # Get a's offset from $sp from the symbol table and initialize
 li $t0 -4
 # Add the stack pointer address to the offset.
@@ -47,8 +54,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_2
 label_1:
@@ -76,8 +82,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_5
 label_4:
@@ -105,8 +110,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_8
 label_7:
@@ -124,8 +128,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 label_8:
 # Get a's offset from $sp from the symbol table and initialize
@@ -152,8 +155,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_12
 label_11:
@@ -182,8 +184,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_15
 label_14:
@@ -212,8 +213,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 j label_18
 label_17:
@@ -231,14 +231,14 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 4
 label_18:
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data

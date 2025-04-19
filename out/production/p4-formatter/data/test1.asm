@@ -22,11 +22,11 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data

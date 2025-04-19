@@ -24,7 +24,22 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
+# Get a's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -4
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 3
+# Complete assignment statement with store
+sw $t1 0($t0)
+# Get b's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -8
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 4
+# Complete assignment statement with store
+sw $t1 0($t0)
 # println
 # Get a's offset from $sp from the symbol table and initialize
 li $t0 -4
@@ -45,11 +60,11 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data

@@ -23,8 +23,7 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -38,6 +37,22 @@ fum:
 # return
 # Update the stack pointer
 addi $sp $sp -0
+# Get a's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -4
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 9
+# Complete assignment statement with store
+sw $t1 0($t0)
+# Get b's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -8
+# Add the stack pointer address to the offset.
+add $t0 $sp $t0
+# Compute rhs for assignment
+li $t1 12
+# Complete assignment statement with store
+sw $t1 0($t0)
 # println
 # Get b's offset from $sp from the symbol table and initialize
 li $t0 -8
@@ -60,24 +75,23 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# function call foo
-# store ra
+# Calling function foo
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -12($sp)
-# Evaluate args and place on the stack
-# update stack pointer
+# Evaluate parameters and save to stack
+# Update the stack pointer
 addi $sp $sp -12
-# call the function
+# Call the function
 jal foo
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 12
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -12($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -96,43 +110,43 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# function call foo
-# store ra
+# Calling function foo
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
-# update stack pointer
+# Evaluate parameters and save to stack
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal foo
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# function call fum
-# store ra
+# Calling function fum
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
-# update stack pointer
+# Evaluate parameters and save to stack
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal fum
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data

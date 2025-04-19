@@ -79,16 +79,16 @@ addi $sp $sp 12
 lw $t0 -12($sp)
 # Restore $ra
 move $ra $t0
-# Get a' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0-4
+# Get a's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -4
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
 # Compute rhs for assignment
 li $t1 5
 # Complete assignment statement with store
 sw $t1 0($t0)
-# Get b' offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
-li $t0-8
+# Get b's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
+li $t0 -8
 # Add the stack pointer address to the offset.
 add $t0 $sp $t0
 # Compute rhs for assignment

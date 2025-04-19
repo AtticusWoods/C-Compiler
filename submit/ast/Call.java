@@ -53,7 +53,16 @@ public class Call extends AbstractNode implements Expression {
       String moveOp = "move $a0 " + arg.getRegister() + "\n";
       String laOp = "la $a0 " + arg.getAddress() + "\n";
       code.append(arg.getAddress() == null ? moveOp : laOp);
-      code.append(String.format("li $v0 %d\n", mipsResults.get(0).getType() == VarType.CHAR ? 4 : 1));
+
+
+      code.append("li $v0 ");
+      if (arg.getType() == VarType.CHAR){
+        code.append(4);
+      } else {
+        code.append(1);
+      }
+      code.append("\n");
+
       code.append("syscall\n");
       code.append("la $a0 newline\n");
       code.append("li $v0 4\n");

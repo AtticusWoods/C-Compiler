@@ -64,7 +64,7 @@ public class BinaryOperator extends AbstractNode implements Expression {
       } else {
         code.append("div ");
       }
-      code.append(lhsReg).append(" ").append(rhsReg).append(" ").append("mflo ").append(lhsReg).append("\n");
+      code.append(lhsReg).append(" ").append(rhsReg).append("\n").append("mflo ").append(lhsReg).append("\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
 

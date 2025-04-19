@@ -24,7 +24,7 @@ add $t0 $sp $t0
 lw $t0 0($t0)
 sw $t0 -8($sp)
 jr $ra
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -53,7 +53,7 @@ lw $t1 0($t1)
 add $t0 $t0 $t1
 sw $t0 -12($sp)
 jr $ra
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 jr $ra
 
@@ -72,27 +72,26 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call identity
-# store ra
+# Calling function identity
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 7
 sw $t1 -8($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal identity
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -12($sp)
 move $a0 $t0
 li $v0 1
@@ -100,29 +99,28 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
 # println
-# function call add
-# store ra
+# Calling function add
+# Save $ra to a register
 move $t0 $ra
-# store t registers
+# Save $t0-9 registers
 sw $t0 -4($sp)
-# Evaluate args and place on the stack
+# Evaluate parameters and save to stack
 li $t1 3
 sw $t1 -8($sp)
 li $t1 4
 sw $t1 -12($sp)
-# update stack pointer
+# Update the stack pointer
 addi $sp $sp -4
-# call the function
+# Call the function
 jal add
-# restore stack pointer
+# Restore stack pointer
 addi $sp $sp 4
-# restore t regs
+# Restore $t0-9 registers
 lw $t0 -4($sp)
-# restore ra
+# Restore $ra
 move $ra $t0
-# get return value off the stack
+# Get return value off the stack
 lw $t0 -16($sp)
 move $a0 $t0
 li $v0 1
@@ -130,11 +128,11 @@ syscall
 la $a0 newline
 li $v0 4
 syscall
-
-# exiting scope, restoring sp 
+# Exiting scope. 
 addi $sp $sp 0
 li $v0 10
 syscall
+
 # All memory structures are placed after the
 # .data assembler directive
 .data
