@@ -52,50 +52,48 @@ public class BinaryOperator extends AbstractNode implements Expression {
         code.append("sub ");
       }
       code.append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
-      
+
     } else if (type == BinaryOperatorType.DIVIDE || type == BinaryOperatorType.TIMES) {
       if (type == BinaryOperatorType.TIMES) {
         code.append("mult ");
       } else {
         code.append("div ");
       }
-      code.append(lhsReg).append(" ").append(rhsReg).append("mflo ").append(lhsReg).append("\n");
-
-      code.append(String.format("%s %s %s\n",
-                      type == BinaryOperatorType.DIVIDE ? "div" : "mult",
-                      lhsReg,
-                      rhsReg))
-              .append(String.format("mflo %s\n", lhsReg));
+      code.append(lhsReg).append(" ").append(rhsReg).append(" ").append("mflo ").append(lhsReg).append("\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+
     } else if (type == BinaryOperatorType.LT) {
-      code.append(String.format("slt %s %s %s\n", lhsReg, lhsReg, rhsReg));
+      code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+
     } else if (type == BinaryOperatorType.GT) {
-      code.append(String.format("slt %s %s %s\n", lhsReg, rhsReg, lhsReg));
+      code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+
     } else if (type == BinaryOperatorType.LE) {
-      code.append(String.format("slt %s %s %s\n", lhsReg, rhsReg, lhsReg));
-      code.append(String.format("subi %s %s 1\n", lhsReg, lhsReg));
+      code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
+      code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+
     } else if (type == BinaryOperatorType.GE) {
-      code.append(String.format("slt %s %s %s\n", lhsReg, lhsReg, rhsReg));
-      code.append(String.format("subi %s %s 1\n", lhsReg, lhsReg));
+      code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+      code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+
     } else if (type == BinaryOperatorType.EQ) {
-      code.append(String.format("xor %s %s %s\n", lhsReg, lhsReg, rhsReg));
-      code.append(String.format("slti %s %s 1\n", lhsReg, lhsReg));
+      code.append("xor ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+      code.append("slti ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
       regAllocator.clear(rhsReg);
       return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
     }
-    System.out.println("Need to implement more binary operators: " + type.toString());
+    System.out.println("Binary operator not found");
     return super.toMIPS(code, data, symbolTable, regAllocator);
   }
 }
