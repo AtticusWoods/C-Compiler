@@ -17,7 +17,7 @@ add:
 #  return
 #  i
 # Update the stack pointer.
-addi $sp $sp -4
+addi $sp $sp -0
 # println
 # Get x's offset from $sp from the symbol table and initialize x's address with it. We'll add $sp later.
 li $t0 -4
@@ -39,7 +39,7 @@ la $a0 newline
 li $v0 4
 syscall
 # Exiting scope.
-addi $sp $sp 4
+addi $sp $sp 0
 jr $ra
 
 # code for main
@@ -51,7 +51,7 @@ main:
 #  b
 #  return
 # Update the stack pointer.
-addi $sp $sp -8
+addi $sp $sp -0
 # println
 la $a0 label_0
 li $v0 4
@@ -130,7 +130,7 @@ move $ra $t0
 # Get return value off stack
 lw $t0 -24($sp)
 # Exiting scope.
-addi $sp $sp 8
+addi $sp $sp 0
 li $v0 10
 syscall
 

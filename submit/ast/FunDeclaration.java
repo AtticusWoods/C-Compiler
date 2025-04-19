@@ -91,14 +91,15 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       // Update stack pointer (for local variables)
       code.append("# Update the stack pointer.\n");
-      code.append("addi $sp $sp -").append(frameSize).append("\n");
+//                                         frameSize
+      code.append("addi $sp $sp -").append("0").append("\n");
       
       // Generate the body of the function
       statement.toMIPS(code, data, symbolTable, regAllocator);
       
       // Exit the scope when done
       code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp ").append(frameSize).append("\n");
+      code.append("addi $sp $sp ").append("0").append("\n");
       
       // Exit the program
       code.append("li $v0 10\n")
@@ -142,7 +143,8 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       // Update stack pointer for local variables
       code.append("# Update the stack pointer.\n");
-      code.append("addi $sp $sp -").append(localVarSize).append("\n");
+//      .append(localVarSize)
+      code.append("addi $sp $sp -").append("0").append("\n");
       
 
       
@@ -151,7 +153,8 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       // Exit the scope when done
       code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp ").append(localVarSize).append("\n");
+//      .append(localVarSize)
+      code.append("addi $sp $sp ").append("0").append("\n");
       code.append("jr $ra\n");
       
       return MIPSResult.createVoidResult();
