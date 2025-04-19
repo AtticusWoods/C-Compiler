@@ -21,6 +21,7 @@ public class MIPSResult {
   private final String address;
   private final VarType type;
   private final int intValue; // Added to store immediate integer values
+  private String addressRegister; // Register holding the address for a variable
 
   public static MIPSResult createVoidResult() {
     return new MIPSResult(null, null, null, 0);

@@ -45,7 +45,8 @@ public class Return extends AbstractNode implements Statement {
       // Get the "return" special symbol from the symbol table
       int returnOffset = symbolTable.find("return").getOffset();
       
-      // Store the result of the expression in the return value location - NO COMMENT
+      // Store the result of the expression in the return value location 
+      code.append("# return value\n");
       code.append("sw ").append(exprResult.getRegister()).append(" ").append(returnOffset + 4).append("($sp)\n");
       
       // Free the register used for the result

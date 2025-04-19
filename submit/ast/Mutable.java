@@ -64,10 +64,11 @@ public class Mutable extends AbstractNode implements Expression, Node {
       code.append("# Load the value of ").append(id).append(".\n");
       code.append("lw ").append(resultRegister).append(" 0(").append(addrRegister).append(")\n");
       
-      // Free the address register
-      regAllocator.clear(addrRegister);
-      
-      return MIPSResult.createRegisterResult(resultRegister, symbolInfo.getType());
+      // Instead of immediately freeing the address register, store it in the result
+      // so the caller can decide when to free it
+      MIPSResult result = new MIPSResult(resultRegister, addrRegister, symbolInfo.getType(), 0);
+
+      return result;
     }
     
     // If variable not found in symbol table
