@@ -16,11 +16,11 @@ fib:
 # return
 # Update the stack pointer
 addi $sp $sp -0
-# get i offset from the stack pointer.
+# Get i's offset from $sp from the symbol table and initialize
 li $t0 -4
-# load offset + sp to get the address of i
+# Add the stack pointer address to the offset.
 add $t0 $sp $t0
-# load the value of i
+#Load the value of i.
 lw $t0 0($t0)
 li $t1 0
 xor $t0 $t0 $t1
@@ -33,11 +33,11 @@ jr $ra
 j label_1
 label_0:
 label_1:
-# get i offset from the stack pointer.
+# Get i's offset from $sp from the symbol table and initialize
 li $t0 -4
-# load offset + sp to get the address of i
+# Add the stack pointer address to the offset.
 add $t0 $sp $t0
-# load the value of i
+#Load the value of i.
 lw $t0 0($t0)
 li $t1 1
 xor $t0 $t0 $t1
@@ -56,11 +56,11 @@ move $t0 $ra
 # store t registers
 sw $t0 -12($sp)
 # Evaluate args and place on the stack
-# get i offset from the stack pointer.
+# Get i's offset from $sp from the symbol table and initialize
 li $t1 -4
-# load offset + sp to get the address of i
+# Add the stack pointer address to the offset.
 add $t1 $sp $t1
-# load the value of i
+#Load the value of i.
 lw $t1 0($t1)
 li $t2 1
 sub $t1 $t1 $t2
@@ -84,11 +84,11 @@ move $t1 $ra
 sw $t0 -12($sp)
 sw $t1 -16($sp)
 # Evaluate args and place on the stack
-# get i offset from the stack pointer.
+# Get i's offset from $sp from the symbol table and initialize
 li $t2 -4
-# load offset + sp to get the address of i
+# Add the stack pointer address to the offset.
 add $t2 $sp $t2
-# load the value of i
+#Load the value of i.
 lw $t2 0($t2)
 li $t3 2
 sub $t2 $t2 $t3

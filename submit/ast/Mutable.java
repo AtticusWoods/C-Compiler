@@ -41,19 +41,19 @@ public class Mutable extends AbstractNode implements Expression, Node {
   public MIPSResult toMIPS(StringBuilder code, StringBuilder data, SymbolTable symbolTable, RegisterAllocator regAllocator) {
     SymbolInfo symbolInfo = symbolTable.find(id);
     int targetOffset = symbolInfo.getOffset();
-    // binary operator expects this the return a reg with the value of this
-    // assignment expects a reg with the sp + offset of this entry in the symbol table
     String reg = regAllocator.getT();
-    if (reg == null) {
-      System.err.println("failed to get reg in Mutable");
-    }
-    code.append(String.format("# get %s offset from the stack pointer.\n", id ));
-    code.append(String.format("li %s %d\n", reg, targetOffset));
 
-    code.append("# load offset + sp to get the address of ").append(id).append("\n");
-    code.append(String.format("add %s $sp %s\n", reg, reg));
-    code.append(String.format("# load the value of %s\n", id));
-    code.append(String.format("lw %s 0(%s)\n", reg, reg));
+    if (reg == null) {
+      System.err.println("Couldnt find reg for mutable");
+    }
+
+    code.append("# Get ").append(id).append("'s offset from $sp from the symbol table and initialize\n");
+    code.append("li ").append(reg).append(" ").append(targetOffset).append("\n");
+
+    code.append("# Add the stack pointer address to the offset.\n");
+    code.append("add ").append(reg).append(" $sp ").append(reg).append("\n");
+    code.append("# Load the value of ").append(id).append(".\n");
+    code.append("lw ").append(reg).append(" 0(").append(reg).append(")\n");
 
     return MIPSResult.createRegisterResult(reg, symbolInfo.getType());
   }
