@@ -48,55 +48,59 @@ public class BinaryOperator extends AbstractNode implements Expression {
     MIPSResult rhsMips = rhs.toMIPS(code, data, symbolTable, regAllocator);
     String rhsReg = rhsMips.getRegister();
 
-    if (type == BinaryOperatorType.PLUS || type == BinaryOperatorType.MINUS) {
-      if (type == BinaryOperatorType.PLUS) {
-        code.append("add ");
-      } else {
-        code.append("sub ");
-      }
-      code.append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
-
-    } else if (type == BinaryOperatorType.DIVIDE || type == BinaryOperatorType.TIMES) {
-      if (type == BinaryOperatorType.TIMES) {
-        code.append("mult ");
-      } else {
-        code.append("div ");
-      }
-      code.append(lhsReg).append(" ").append(rhsReg).append("\n").append("mflo ").append(lhsReg).append("\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
-
-    } else if (type == BinaryOperatorType.LT) {
-      code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
-
-    } else if (type == BinaryOperatorType.GT) {
-      code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
-
-    } else if (type == BinaryOperatorType.LE) {
-      code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
-      code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
-
-    } else if (type == BinaryOperatorType.GE) {
-      code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-      code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
-
-    } else if (type == BinaryOperatorType.EQ) {
-      code.append("xor ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
-      code.append("slti ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
-      regAllocator.clear(rhsReg);
-      return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+    switch (type) {
+      case PLUS:
+        code.append("add ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+        
+      case MINUS:
+        code.append("sub ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+        
+      case TIMES:
+        code.append("mult ").append(lhsReg).append(" ").append(rhsReg).append("\n").append("mflo ").append(lhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+        
+      case DIVIDE:
+        code.append("div ").append(lhsReg).append(" ").append(rhsReg).append("\n").append("mflo ").append(lhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.INT);
+        
+      case LT:
+        code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+        
+      case GT:
+        code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+        
+      case LE:
+        code.append("slt").append(" ").append(lhsReg).append(" ").append(rhsReg).append(" ").append(lhsReg).append("\n");
+        code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+        
+      case GE:
+        code.append("slt").append(" ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+        code.append("subi ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+        
+      case EQ:
+        code.append("xor ").append(lhsReg).append(" ").append(lhsReg).append(" ").append(rhsReg).append("\n");
+        code.append("slti ").append(lhsReg).append(" ").append(lhsReg).append(" 1\n");
+        regAllocator.clear(rhsReg);
+        return MIPSResult.createRegisterResult(lhsReg, VarType.BOOL);
+        
+      default:
+        System.out.println("Binary operator not found");
+        return super.toMIPS(code, data, symbolTable, regAllocator);
     }
-    System.out.println("Binary operator not found");
-    return super.toMIPS(code, data, symbolTable, regAllocator);
   }
 }
+
