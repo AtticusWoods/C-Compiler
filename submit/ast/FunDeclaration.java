@@ -9,6 +9,7 @@ import submit.RegisterAllocator;
 import submit.SymbolTable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -76,6 +77,9 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
         code.append("#  println\n");
       }
       
+      // Always add the "return" symbol for consistency - only once
+      code.append("#  return\n");
+      
       // Calculate the stack space needed for local variables
       int frameSize = 0;
       if (statement instanceof CompoundStatement) {
@@ -91,15 +95,14 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       // Update stack pointer (for local variables)
       code.append("# Update the stack pointer.\n");
-//                                         frameSize
-      code.append("addi $sp $sp -").append("0").append("\n");
+      code.append("addi $sp $sp -").append(frameSize).append("\n");
       
       // Generate the body of the function
       statement.toMIPS(code, data, symbolTable, regAllocator);
       
       // Exit the scope when done
       code.append("# Exiting scope.\n");
-      code.append("addi $sp $sp ").append("0").append("\n");
+      code.append("addi $sp $sp ").append(frameSize).append("\n");
       
       // Exit the program
       code.append("li $v0 10\n")
@@ -143,21 +146,46 @@ public class FunDeclaration extends AbstractNode implements Declaration, Node {
       
       // Update stack pointer for local variables
       code.append("# Update the stack pointer.\n");
-//      .append(localVarSize)
-      code.append("addi $sp $sp -").append("0").append("\n");
-      
-
+      code.append("addi $sp $sp -").append(localVarSize).append("\n");
       
       // Generate the body of the function
       statement.toMIPS(code, data, symbolTable, regAllocator);
       
-      // Exit the scope when done
+      // The Return statement will generate 'jr $ra', so we don't need to add it again here
+      
+      // Exit the scope when done - add this before the implied return
       code.append("# Exiting scope.\n");
-//      .append(localVarSize)
-      code.append("addi $sp $sp ").append("0").append("\n");
-      code.append("jr $ra\n");
+      code.append("addi $sp $sp ").append(localVarSize).append("\n");
+      
+      // Add a jr $ra only if the statement doesn't already end with one
+      // This ensures functions without explicit return statements still return properly
+      if (!(statement instanceof CompoundStatement) || 
+          !endsWithReturn(((CompoundStatement)statement).getStatements())) {
+        code.append("jr $ra\n");
+      }
       
       return MIPSResult.createVoidResult();
     }
+  }
+  
+  /**
+   * Check if a list of statements ends with a Return statement
+   */
+  private boolean endsWithReturn(List<Statement> statements) {
+    if (statements == null || statements.isEmpty()) {
+      return false;
+    }
+    Statement lastStmt = statements.get(statements.size() - 1);
+    if (lastStmt instanceof Return) {
+      return true;
+    } else if (lastStmt instanceof CompoundStatement) {
+      return endsWithReturn(((CompoundStatement)lastStmt).getStatements());
+    } else if (lastStmt instanceof If) {
+      If ifStmt = (If)lastStmt;
+      return endsWithReturn(Collections.singletonList(ifStmt.getTrueStatement())) && 
+             (ifStmt.getFalseStatement() == null || 
+              endsWithReturn(Collections.singletonList(ifStmt.getFalseStatement())));
+    }
+    return false;
   }
 }

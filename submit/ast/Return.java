@@ -34,28 +34,22 @@ public class Return extends AbstractNode implements Statement {
 
   @Override
   public MIPSResult toMIPS(StringBuilder code, 
-                          StringBuilder data,
-                          SymbolTable symbolTable,
-                          RegisterAllocator regAllocator) {
+                           StringBuilder data,
+                           SymbolTable symbolTable,
+                           RegisterAllocator regAllocator) {
     // If there's an expression to return
     if (expr != null) {
       // Evaluate the expression first
       MIPSResult exprResult = expr.toMIPS(code, data, symbolTable, regAllocator);
       
-      // Get the "return" special symbol from the symbol table
-      int returnOffset = symbolTable.find("return").getOffset();
-      
-      // Store the result of the expression in the return value location 
-//      code.append("# return value\n");
-      code.append("sw ").append(exprResult.getRegister()).append(" ").append(returnOffset + 4).append("($sp)\n");
-      
-      // Free the register used for the result
-      if (exprResult.getRegister() != null) {
+      // Move result to $t0 (our standard return register)
+      if (exprResult.getRegister() != null && !exprResult.getRegister().equals("$t0")) {
+        code.append("move $t0 ").append(exprResult.getRegister()).append("\n");
         regAllocator.clear(exprResult.getRegister());
       }
     }
     
-    // Always return to the caller with jr $ra
+    // Return to caller
     code.append("jr $ra\n");
     
     return MIPSResult.createVoidResult();

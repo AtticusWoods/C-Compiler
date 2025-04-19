@@ -119,6 +119,17 @@ public final class RegisterAllocator {
         }
     }
 
+    public boolean isInUse(String reg) {
+        if (reg.charAt(1) == 't') {
+            int index = Integer.parseInt(reg.substring(2));
+            return index >= 0 && index < t.length && t[index];
+        } else if (reg.charAt(1) == 's') {
+            int index = Integer.parseInt(reg.substring(2));
+            return index >= 0 && index < s.length && s[index];
+        }
+        return false;
+    }
+
     public void clearAll() {
         Arrays.fill(t, false);
         Arrays.fill(s, false);

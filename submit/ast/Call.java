@@ -89,39 +89,55 @@ public class Call extends AbstractNode implements Expression {
 
       return MIPSResult.createVoidResult();
     } else {
-      // Handle regular function calls with parameters
+      // Normal function call
       code.append("# Calling function ").append(id).append("\n");
-
-      // First, get a dedicated register for saving $ra that won't be overwritten
-      String raRegister = regAllocator.getT();
+      
+      // Save $ra to a dedicated register - always use $t9 to avoid conflicts
       code.append("# Save $ra to a dedicated register\n");
-      code.append("move ").append(raRegister).append(" $ra\n");
+      code.append("move $t9 $ra\n");
       
-      // Calculate initial stack space needed for base register saving
-      symbolTable.addToActivationRecordSize(4);  // For $ra initially
-      int baseOffset = symbolTable.getActivationRecordSize();
-
-      // Save all used temporary registers BEFORE evaluating any parameters
+      // First, save all in-use temporary registers that will be needed after the call
       code.append("# Save used temporary registers\n");
-      int regSaveSpace = regAllocator.saveT(code, baseOffset);
       
-      // Update activation record size to include space for saved registers
-      if (regSaveSpace > 0) {
-        symbolTable.addToActivationRecordSize(regSaveSpace);
+      // We need to track which registers need saving
+      int numSavedRegs = 0;
+      StringBuilder saveCmds = new StringBuilder();
+      
+      // Save all used temporary registers (except t9 which we just used for $ra)
+      for (int i = 0; i < 9; i++) {
+        String reg = "$t" + i;
+        if (regAllocator.isInUse(reg)) {
+          numSavedRegs++;
+          // Calculate the offset for this register
+          int offset = 4 * numSavedRegs;
+          saveCmds.append("sw ").append(reg).append(" -").append(offset).append("($sp)\n");
+        }
       }
       
-      // Get total space needed for saved registers
-      int savedRegsSpace = symbolTable.getActivationRecordSize();
+      // Add the save commands to the code
+      code.append(saveCmds);
       
-      // Now evaluate parameters and save to stack (after saving registers)
+      // Calculate total stack space needed (4 bytes per saved register)
+      int frameSpace = 4 * numSavedRegs;
+      
+      // Now evaluate parameters and save to stack 
+      // We'll use dedicated registers for parameter evaluation
       code.append("# Evaluate parameters and save to stack\n");
-
+      
+      // Space for parameters starts after the saved registers
+      int paramOffset = frameSpace;
+      List<Integer> paramOffsets = new ArrayList<>();
+      
+      // First, evaluate all parameters and get their values in registers
       for (int i = 0; i < args.size(); i++) {
-        symbolTable.addToActivationRecordSize(4);
-        int paramOffset = symbolTable.getActivationRecordSize();
         Expression arg = args.get(i);
         MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
-
+        
+        // Increment param offset for this parameter
+        paramOffset += 4;
+        paramOffsets.add(paramOffset);
+        
+        // Store the parameter on the stack
         if (result.getRegister() != null) {
           code.append("sw ").append(result.getRegister()).append(" -").append(paramOffset).append("($sp)\n");
           regAllocator.clear(result.getRegister());
@@ -133,49 +149,66 @@ public class Call extends AbstractNode implements Expression {
           regAllocator.clear(tempReg);
         }
       }
-      symbolTable.addToActivationRecordSize(-4 * args.size());
-
-      // Update stack pointer for function call
-      code.append("# Update the stack pointer\n");
-      code.append("add $sp $sp -").append(savedRegsSpace).append("\n");
-
-      // Call the function
+      
+      // Update stack pointer before call - only count the saved registers space
+      // Parameters are passed via stack but we don't adjust $sp for them
+      if (frameSpace > 0) {
+        code.append("# Update the stack pointer\n");
+        code.append("add $sp $sp -").append(frameSpace).append("\n");
+      }
+      
+      // Call function
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
-
+      
       // Restore stack pointer
-      code.append("# Restore the stack pointer\n");
-      code.append("add $sp $sp ").append(savedRegsSpace).append("\n");
-
-      // Restore used temporary registers
-      code.append("# Restore used temporary registers\n");
-      regAllocator.restoreT(code, baseOffset);
+      if (frameSpace > 0) {
+        code.append("# Restore the stack pointer\n");
+        code.append("add $sp $sp ").append(frameSpace).append("\n");
+      }
       
-      // Account for stack space used by saved registers
-      symbolTable.addToActivationRecordSize(-savedRegsSpace);
-
-      // Restore return address from our dedicated register
-      code.append("# Restore $ra\n");
-      code.append("move $ra ").append(raRegister).append("\n");
-      regAllocator.clear(raRegister);
+      // After the call, $t0 now contains the return value (due to our return convention)
+      // We need to save it temporarily if we have registers to restore
+      String returnReg = "$t0"; // Default return register
       
-      // Get the return value from the stack using the special return symbol location
-      // We need to calculate where the return value is stored in relation to the current stack pointer
-      int paramSize = 4 * args.size(); // Size of all parameters
-      int returnOffset = savedRegsSpace + paramSize + 4; // +4 for the return value itself
-      
-      // Retrieve the return value and store it in $t0
-      code.append("# Get return value off stack\n");
-      code.append("lw $t0 -").append(returnOffset).append("($sp)\n");
-      
-      // Return the result in $t0
-      String resultReg = "$t0";  // Always use t0 for consistency with other parts of the compiler
+      if (numSavedRegs > 0) {
+        // Save the return value temporarily in $t8
+        code.append("# Save return value temporarily\n");
+        code.append("move $t8 $t0\n");
+        
+        // Restore saved registers
+        code.append("# Restore used temporary registers\n");
+        
+        // Restore registers in the same order they were saved
+        int regIndex = 0;
+        for (int i = 0; i < 9; i++) {
+          String reg = "$t" + i;
+          if (regAllocator.isInUse(reg)) {
+            regIndex++;
+            // Calculate the offset for this register
+            int offset = 4 * regIndex;
+            code.append("lw ").append(reg).append(" -").append(offset).append("($sp)\n");
+          }
+        }
+        
+        // Restore return address from $t9
+        code.append("# Restore $ra\n");
+        code.append("move $ra $t9\n");
+        
+        // Move return value back to $t0
+        code.append("move $t0 $t8\n");
+      } else {
+        // If no registers to restore, just restore $ra
+        code.append("# Restore $ra\n");
+        code.append("move $ra $t9\n");
+      }
       
       // Get the function's return type from the symbol table
       SymbolInfo funcInfo = symbolTable.find(id);
       VarType returnType = funcInfo != null ? funcInfo.getType() : VarType.INT;
       
-      return MIPSResult.createRegisterResult(resultReg, returnType);
+      // Return the result in the selected register
+      return MIPSResult.createRegisterResult(returnReg, returnType);
     }
   }
 }
