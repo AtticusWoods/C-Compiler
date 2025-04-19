@@ -36,7 +36,7 @@ public class Call extends AbstractNode implements Expression {
     }
     builder.append(")");
   }
-  
+
   @Override
   public MIPSResult toMIPS(StringBuilder code,
                            StringBuilder data,
@@ -48,13 +48,13 @@ public class Call extends AbstractNode implements Expression {
       if (!data.toString().contains("newline:")) {
         data.append("newline:\t.asciiz\t\"\\n\"\n");
       }
-      
+
       // Process println call
       if (args.size() == 1) {
         code.append("# println\n");
         Expression arg = args.get(0);
         MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
-        
+
         // Handle different types of arguments
         if (result.getType() == VarType.CHAR && result.getAddress() != null) {
           // String constant
@@ -73,7 +73,7 @@ public class Call extends AbstractNode implements Expression {
           code.append("li $v0 1\n");
           code.append("syscall\n");
         }
-        
+
         // Add newline
         code.append("la $a0 newline\n");
         code.append("li $v0 4\n");
@@ -85,64 +85,71 @@ public class Call extends AbstractNode implements Expression {
         code.append("li $v0 4\n");
         code.append("syscall\n");
       }
-      
+
       return MIPSResult.createVoidResult();
     } else {
       // Handle regular function calls with parameters
       code.append("# Calling function ").append(id).append("\n");
-      
+
       // Save the return address register
       code.append("# Save $ra to a register\n");
       code.append("move $t0 $ra\n");
-      
-      // Calculate stack space needed - 12 bytes consistent with teacher example
-      int savedRegsSpace = 12;  // This matches the teacher's example
-      
+
+      // Calculate stack space needed
+      symbolTable.addToActivationRecordSize(4);  // For $ra
+      int savedRegsSpace = symbolTable.getActivationRecordSize();  // This matches the teacher's example
+
       // Save $t0 (which contains $ra)
       code.append("# Save $t0-9 registers\n");
       code.append("sw $t0 -").append(savedRegsSpace).append("($sp)\n");
-      
+
       // Evaluate parameters and save to stack
       code.append("# Evaluate parameters and save to stack\n");
-      
+
       // Process parameters - matching teacher's offsets exactly
-      int paramOffset = 16;  // First parameter at -16($sp)
+
+
       for (int i = 0; i < args.size(); i++) {
+        symbolTable.addToActivationRecordSize(4);
+        int paramOffset = symbolTable.getActivationRecordSize();
         Expression arg = args.get(i);
         MIPSResult result = arg.toMIPS(code, data, symbolTable, regAllocator);
-        
+
         if (result.getRegister() != null) {
-          code.append("sw ").append(result.getRegister()).append(" -").append(paramOffset + (i * 4)).append("($sp)\n");
+          code.append("sw ").append(result.getRegister()).append(" -").append(paramOffset).append("($sp)\n");
           regAllocator.clear(result.getRegister());
         } else {
           // For number constants
           String tempReg = regAllocator.getT();
           code.append("li ").append(tempReg).append(" ").append(result.getIntValue()).append("\n");
-          code.append("sw ").append(tempReg).append(" -").append(paramOffset + (i * 4)).append("($sp)\n");
+          code.append("sw ").append(tempReg).append(" -").append(paramOffset).append("($sp)\n");
           regAllocator.clear(tempReg);
         }
       }
-      
+      symbolTable.addToActivationRecordSize(-4 * args.size());
+
       // Update stack pointer for function call - exactly 12 as in the teacher's example
       code.append("# Update the stack pointer\n");
       code.append("add $sp $sp -").append(savedRegsSpace).append("\n");
-      
+
       // Call the function
       code.append("# Call the function\n");
       code.append("jal ").append(id).append("\n");
-      
+
       // Restore stack pointer
       code.append("# Restore the stack pointer\n");
       code.append("add $sp $sp ").append(savedRegsSpace).append("\n");
-      
+
       // Restore saved registers
       code.append("# Restore $t0-9 registers\n");
       code.append("lw $t0 -").append(savedRegsSpace).append("($sp)\n");
-      
+      symbolTable.addToActivationRecordSize(-4);
+
+
       // Restore return address
       code.append("# Restore $ra\n");
       code.append("move $ra $t0\n");
-      
+
       return MIPSResult.createVoidResult();
     }
   }

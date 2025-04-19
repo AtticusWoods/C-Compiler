@@ -114,32 +114,32 @@ syscall
 # Save $ra to a register
 move $t0 $ra
 # Save $t0-9 registers
-sw $t0 -12($sp)
+sw $t0 -4($sp)
 # Evaluate parameters and save to stack
 # Update the stack pointer
-add $sp $sp -12
+add $sp $sp -4
 # Call the function
 jal foo
 # Restore the stack pointer
-add $sp $sp 12
+add $sp $sp 4
 # Restore $t0-9 registers
-lw $t0 -12($sp)
+lw $t0 -4($sp)
 # Restore $ra
 move $ra $t0
 # Calling function fum
 # Save $ra to a register
 move $t0 $ra
 # Save $t0-9 registers
-sw $t0 -12($sp)
+sw $t0 -8($sp)
 # Evaluate parameters and save to stack
 # Update the stack pointer
-add $sp $sp -12
+add $sp $sp -8
 # Call the function
 jal fum
 # Restore the stack pointer
-add $sp $sp 12
+add $sp $sp 8
 # Restore $t0-9 registers
-lw $t0 -12($sp)
+lw $t0 -8($sp)
 # Restore $ra
 move $ra $t0
 # Exiting scope.
